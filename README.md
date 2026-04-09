@@ -112,13 +112,38 @@ Optional:
 
 ---
 
-## Running as a Service (Windows)
+## Running Automatically on Windows Startup
 
-To run automatically on startup, use [NSSM](https://nssm.cc/):
+### Option 1: Startup Folder (Easiest)
+
+1. Press `Win + R`, type `shell:startup`, press Enter
+2. Copy `start_monitor.bat` into the Startup folder
+3. Edit `start_monitor.bat` to match your path:
+   ```batch
+   cd /d "C:\path\to\mtconnect-alarm-monitor-classic"
+   python main.py
+   ```
+
+The script will wait 5 minutes after Windows boots before starting.
+
+### Option 2: Windows Task Scheduler (Recommended)
+
+1. Open Task Scheduler (`taskschd.msc`)
+2. Create a new task:
+   - **General**: Name it "MTConnect Alarm Monitor"
+   - **Triggers**: Begin the task: **At startup**, delay for **5 minutes**
+   - **Actions**: Start a program: `python.exe`
+   - **Arguments**: `C:\path\to\main.py`
+   - **Conditions**: Uncheck "Start the task only if the computer is on AC power"
+   - **Settings**: Check "Run whether user is logged on or not" (optional)
+
+### Option 3: NSSM (Service)
+
+For advanced users, use [NSSM](https://nssm.cc/):
 
 ```bash
 nssm install MTConnectAlarmMonitor
-# Set Path to python.exe
+# Set Path to: C:\path\to\python.exe
 # Set Arguments to: C:\path\to\main.py
 ```
 
