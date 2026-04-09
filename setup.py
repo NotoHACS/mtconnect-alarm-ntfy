@@ -2,7 +2,7 @@
 """
 Interactive setup wizard for MTConnect Alarm Monitor.
 
-Guides the user through configuration — no need to edit files manually.
+Guides the user through configuration -- no need to edit files manually.
 """
 
 import os
@@ -35,12 +35,12 @@ def ask(prompt, default=None, validator=None, help_text=None):
             answer = default
 
         if not answer:
-            print("  ⚠️  This field is required.")
+            print("  [!] This field is required.")
             continue
 
         if validator and not validator(answer):
             if help_text:
-                print(f"  ⚠️  {help_text}")
+                print(f"  [!] {help_text}")
             continue
 
         return answer
@@ -60,14 +60,34 @@ def ask_yes_no(prompt, default="yes"):
         if answer in ("n", "no"):
             return False
 
-        print("  ⚠️  Please enter 'yes' or 'no'")
+        print("  [!] Please enter 'yes' or 'no'")
+
+
+def ask_choice(prompt, choices, default=None):
+    """Ask user to select from a list of choices."""
+    print(f"\n{prompt}")
+    for i, (key, desc) in enumerate(choices, 1):
+        marker = " *" if key == default else ""
+        print(f"  {i}. {desc}{marker}")
+    print()
+
+    while True:
+        answer = input(f"Enter choice (1-{len(choices)}): ").strip()
+        if not answer and default:
+            return default
+        try:
+            idx = int(answer) - 1
+            if 0 <= idx < len(choices):
+                return choices[idx][0]
+        except ValueError:
+            pass
+        print(f"  [!] Please enter a number 1-{len(choices)}")
 
 
 def validate_ip_or_hostname(value):
     """Basic validation for IP or hostname."""
     if not value:
         return False
-    # Allow simple hostnames, IPs, localhost
     return re.match(r'^[\w\-\.]+$', value) is not None
 
 
@@ -84,8 +104,14 @@ def validate_topic(value):
     """Validate ntfy topic name."""
     if not value:
         return False
-    # ntfy topics: alphanumeric, dashes, underscores
     return re.match(r'^[a-zA-Z0-9_-]+$', value) is not None and len(value) >= 3
+
+
+def validate_url(value):
+    """Basic URL validation."""
+    if not value:
+        return False
+    return value.startswith(('http://', 'https://'))
 
 
 def generate_random_topic():
@@ -101,16 +127,13 @@ def generate_random_topic():
 def main():
     print_header("MTConnect Alarm Monitor - Setup")
     print("This wizard will help you configure the alarm monitor.")
-    print("You'll need:")
-    print("  • Your CNC machine's IP address or hostname")
-    print("  • A unique ntfy.sh topic name (for phone notifications)")
     print()
 
     if not ask_yes_no("Ready to start?", default="yes"):
         print("\nSetup cancelled. You can run this again anytime with: python setup.py")
         sys.exit(0)
 
-    # ── MTConnect Agent Configuration ───────────────────────────────────────
+    # -- MTConnect Agent Configuration -----------------------------------------
     print_section("Step 1: MTConnect Agent Configuration")
     print("The MTConnect agent runs on your CNC or a connected PC.")
     print("It provides alarm data over HTTP.")
@@ -136,28 +159,77 @@ def main():
         help_text="This is the device identifier in the MTConnect XML"
     )
 
-    # ── NTFY Configuration ───────────────────────────────────────────────────
-    print_section("Step 2: Notification Setup (ntfy.sh)")
-    print("ntfy.sh sends free push notifications to your phone.")
-    print("Pick a unique topic name that others won't guess.")
+    # -- NTFY Server Selection -------------------------------------------------
+    print_section("Step 2: Notification Server")
+    print("Choose where to send notifications:")
+    print()
+    print("  Public (ntfy.sh): Free, easy setup, no server needed")
+    print("  Private server:   Your own ntfy instance (more control)")
     print()
 
-    suggested_topic = generate_random_topic()
-    print(f"Suggested topic: {suggested_topic}")
-    print()
-
-    ntfy_topic = ask(
-        "Enter your ntfy.sh topic name",
-        default=suggested_topic,
-        validator=validate_topic,
-        help_text="Topic must be 3+ characters, letters/numbers/dashes/underscores only"
+    ntfy_server_type = ask_choice(
+        "Select notification server type:",
+        [("public", "Public ntfy.sh (default)"),
+         ("private", "Private ntfy server")],
+        default="public"
     )
 
+    ntfy_server = "https://ntfy.sh"
+    ntfy_topic = ""
+    test_url = ""
+
+    if ntfy_server_type == "public":
+        # -- Public ntfy.sh setup ----------------------------------------------
+        print_section("Step 2a: ntfy.sh Topic")
+        print("Pick a unique topic name that others won't guess.")
+        print("Anyone who knows the topic name can subscribe.")
+        print()
+
+        suggested_topic = generate_random_topic()
+        print(f"Suggested topic: {suggested_topic}")
+        print()
+
+        ntfy_topic = ask(
+            "Enter your ntfy.sh topic name",
+            default=suggested_topic,
+            validator=validate_topic,
+            help_text="Topic must be 3+ characters, letters/numbers/dashes/underscores only"
+        )
+
+        test_url = f"https://ntfy.sh/{ntfy_topic}"
+
+    else:
+        # -- Private ntfy server setup -----------------------------------------
+        print_section("Step 2a: Private NTFY Server")
+        print("Configure your own ntfy server.")
+        print()
+
+        ntfy_server = ask(
+            "Enter your ntfy server URL (e.g., https://ntfy.example.com)",
+            default="https://ntfy.yourdomain.com",
+            validator=validate_url,
+            help_text="Must start with http:// or https://"
+        )
+
+        ntfy_topic = ask(
+            "Enter your ntfy topic name",
+            default="cnc-alarms",
+            validator=validate_topic,
+            help_text="Topic must be 3+ characters, letters/numbers/dashes/underscores only"
+        )
+
+        test_url = f"{ntfy_server.rstrip('/')}/{ntfy_topic}"
+
     print()
-    print("📱 To receive notifications:")
-    print(f"   1. Install the ntfy app from F-Droid or Google Play")
-    print(f"   2. Subscribe to topic: {ntfy_topic}")
-    print(f"   3. Or visit: https://ntfy.sh/{ntfy_topic}")
+    print("[i] To receive notifications:")
+    if ntfy_server_type == "public":
+        print(f"   1. Install the ntfy app from F-Droid or Google Play")
+        print(f"   2. Subscribe to topic: {ntfy_topic}")
+        print(f"   3. Or visit: {test_url}")
+    else:
+        print(f"   1. Install the ntfy app")
+        print(f"   2. Add your server: {ntfy_server}")
+        print(f"   3. Subscribe to topic: {ntfy_topic}")
     print()
 
     if ask_yes_no("Would you like to test notifications now?", default="yes"):
@@ -165,25 +237,25 @@ def main():
         try:
             import requests
             resp = requests.post(
-                f"https://ntfy.sh/{ntfy_topic}",
-                data="MTConnect Alarm Monitor is now configured! 🎉",
+                test_url,
+                data=f"MTConnect Alarm Monitor configured! Topic: {ntfy_topic}",
                 headers={"Title": "Setup Complete"},
                 timeout=10
             )
             if resp.status_code == 200:
-                print("  ✅ Test notification sent! Check your phone.")
+                print("  [OK] Test notification sent! Check your phone.")
             else:
-                print(f"  ⚠️  Unexpected response: {resp.status_code}")
+                print(f"  [!] Unexpected response: {resp.status_code}")
         except Exception as e:
-            print(f"  ⚠️  Could not send test: {e}")
+            print(f"  [!] Could not send test: {e}")
             print("      (You can test later by running: python main.py)")
 
-    # ── Polling Interval ──────────────────────────────────────────────────────
+    # -- Polling Interval ------------------------------------------------------
     print_section("Step 3: Polling Settings")
     print("How often should we check for new alarms?")
-    print("  • 10 seconds = Fast detection, more network traffic")
-    print("  • 30 seconds = Balanced (recommended)")
-    print("  • 60 seconds = Slower detection, minimal traffic")
+    print("  * 10 seconds = Fast detection, more network traffic")
+    print("  * 30 seconds = Balanced (recommended)")
+    print("  * 60 seconds = Slower detection, minimal traffic")
     print()
 
     poll_interval = ask(
@@ -193,12 +265,13 @@ def main():
         help_text="Must be a number (seconds)"
     )
 
-    # ── Confirm and Write ────────────────────────────────────────────────────
+    # -- Confirm and Write -----------------------------------------------------
     print_section("Configuration Summary")
     print(f"  MTConnect Host:  {mtconnect_host}")
     print(f"  MTConnect Port:  {mtconnect_port}")
     print(f"  Device Name:     {mtconnect_device}")
-    print(f"  ntfy Topic:      {ntfy_topic}")
+    print(f"  NTFY Server:     {ntfy_server}")
+    print(f"  NTFY Topic:      {ntfy_topic}")
     print(f"  Poll Interval:   {poll_interval} seconds")
     print()
 
@@ -206,46 +279,46 @@ def main():
         print("\nSetup cancelled. No changes were made.")
         sys.exit(0)
 
-    # ── Write config.py ──────────────────────────────────────────────────────
+    # -- Write config.py -------------------------------------------------------
     config_content = f'''"""
 Configuration for the Okuma MTConnect Alarm Poller.
 Generated by setup.py on {os.popen('date').read().strip()}
 """
 
-# ── MTConnect Agent ──────────────────────────────────────────────────────────
+# -- MTConnect Agent ----------------------------------------------------------
 MTCONNECT_HOST = "{mtconnect_host}"
 MTCONNECT_PORT = {mtconnect_port}
 MTCONNECT_URL = f"http://{{MTCONNECT_HOST}}:{{MTCONNECT_PORT}}"
 MTCONNECT_DEVICE = "{mtconnect_device}"
 
-# ── Polling Settings ───────────────────────────────────────────────────────────
+# -- Polling Settings -----------------------------------------------------------
 POLL_INTERVAL_SECONDS = {poll_interval}
 REQUEST_TIMEOUT_SECONDS = 15
 
-# ── NTFY ─────────────────────────────────────────────────────────────────────
+# -- NTFY ---------------------------------------------------------------------
 NTFY_TOPIC = "{ntfy_topic}"
-NTFY_URL = f"https://ntfy.sh/{{NTFY_TOPIC}}"
-NTFY_SERVER = "https://ntfy.sh"
+NTFY_URL = f"{ntfy_server}/{{NTFY_TOPIC}}"
+NTFY_SERVER = "{ntfy_server}"
 NTFY_PRIORITY = 4
 NTFY_TAGS = ["warning", "bell"]
-NTFY_CLICK = "https://ntfy.sh"
+NTFY_CLICK = "{ntfy_server}"
 
-# ── Logging ───────────────────────────────────────────────────────────────────
+# -- Logging ------------------------------------------------------------------
 LOG_FILE = "alarm_poller.log"
 LOG_LEVEL = "INFO"
-LOG_FORMAT = "%(asctime)s [%(levelname)s] %(name)s — %(message)s"
+LOG_FORMAT = "%(asctime)s [%(levelname)s] %(name)s -- %(message)s"
 LOG_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 '''
 
     try:
         with open("config.py", "w") as f:
             f.write(config_content)
-        print("\n✅ Configuration saved to config.py")
+        print("\n[OK] Configuration saved to config.py")
     except Exception as e:
-        print(f"\n❌ Failed to save config: {e}")
+        print(f"\n[X] Failed to save config: {e}")
         sys.exit(1)
 
-    # ── Done ───────────────────────────────────────────────────────────────────
+    # -- Done ------------------------------------------------------------------
     print()
     print("=" * 50)
     print("  Setup Complete!")

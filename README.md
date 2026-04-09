@@ -12,7 +12,7 @@ Polls an Okuma MTConnect agent for CNC alarms and sends push notifications via [
 | **OS** | Windows 7+ | Windows 10/11 recommended |
 | **Network** | Internet | For ntfy.sh notifications |
 
-> ⚠️ **Windows 7 users**: Python 3.8.10 is the newest version that works on Windows 7. Download it [here](https://www.python.org/downloads/release/python-3810/).
+> [!] **Windows 7 users**: Python 3.8.10 is the newest version that works on Windows 7. Download it [here](https://www.python.org/downloads/release/python-3810/).
 
 ---
 
@@ -75,10 +75,10 @@ NTFY_TOPIC = "your-private-topic-12345"
 
 ## Dependencies
 
-- **requests** ≥ 2.31.0 — HTTP client for MTConnect API and ntfy.sh
+- **requests** >= 2.31.0 -- HTTP client for MTConnect API and ntfy.sh
 
 Optional:
-- **ntfy** — Python ntfy library (falls back to requests if not installed)
+- **ntfy** -- Python ntfy library (falls back to requests if not installed)
 
 ---
 
@@ -95,12 +95,12 @@ Optional:
 
 | Alarm Level | Priority | Tags |
 |-------------|----------|------|
-| P (Emergency) | 5 (max) | 🔥 fire, rotating_light |
+| P (Emergency) | 5 (max) | [FIRE] fire, rotating_light |
 | A (Critical) | 5 (max) | rotating_light, bell |
 | B | 4 (high) | warning, bell |
 | C | 3 (default) | warning |
 | D | 2 (low) | information_source |
-| Cleared | 3 | ✅ white_check_mark |
+| Cleared | 3 | [OK] white_check_mark |
 
 ---
 
@@ -151,7 +151,7 @@ nssm install MTConnectAlarmMonitor
 
 ## License
 
-MIT — See LICENSE file
+MIT -- See LICENSE file
 
 ## Contributing
 
