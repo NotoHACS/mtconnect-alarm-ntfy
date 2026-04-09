@@ -63,7 +63,7 @@ If you prefer to edit `config.py` directly:
 
 ```python
 # MTConnect Agent settings
-MTCONNECT_HOST = "192.168.1.100"  # Your CNC's IP
+MTCONNECT_HOST = "localhost"
 MTCONNECT_PORT = 5000
 MTCONNECT_DEVICE = "CNC_7"
 
