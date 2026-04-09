@@ -184,6 +184,7 @@ class NtfyNotifier:
     def _send_via_requests(self, title: str, message: str, alarm: Alarm) -> bool:
         """
         Publish directly to the ntfy.sh REST API using ``requests``.
+        Includes retry logic with exponential backoff for transient failures.
 
         See: https://ntfy.sh/docs/publish/
         """
@@ -196,20 +197,57 @@ class NtfyNotifier:
             "X-Custom": f"alarm:{alarm.key}",  # useful for ntfy filtering rules
         }
 
-        try:
-            resp = requests.post(
-                self.url,
-                data=message,
-                headers=headers,
-                timeout=15,
-            )
-            resp.raise_for_status()
-            logger.info("NTFY notification sent (requests): %s", title)
-            return True
+        max_retries = 3
+        for attempt in range(1, max_retries + 1):
+            try:
+                resp = requests.post(
+                    self.url,
+                    data=message,
+                    headers=headers,
+                    timeout=15,
+                )
+                resp.raise_for_status()
+                logger.info("NTFY notification sent (requests): %s", title)
+                return True
 
-        except requests.RequestException as exc:
-            logger.error("NTFY request failed: %s", exc)
-            return False
+            except requests.exceptions.SSLError as exc:
+                logger.warning(
+                    "NTFY SSL error (attempt %d/%d): %s — retrying...",
+                    attempt, max_retries, exc
+                )
+                if attempt < max_retries:
+                    import time
+                    time.sleep(2 ** attempt)  # exponential backoff: 2s, 4s
+                else:
+                    logger.error("NTFY SSL error exhausted retries: %s", exc)
+
+            except requests.exceptions.ConnectionError as exc:
+                logger.warning(
+                    "NTFY connection error (attempt %d/%d): %s — retrying...",
+                    attempt, max_retries, exc
+                )
+                if attempt < max_retries:
+                    import time
+                    time.sleep(2 ** attempt)
+                else:
+                    logger.error("NTFY connection error exhausted retries: %s", exc)
+
+            except requests.exceptions.Timeout as exc:
+                logger.warning(
+                    "NTFY timeout (attempt %d/%d): %s — retrying...",
+                    attempt, max_retries, exc
+                )
+                if attempt < max_retries:
+                    import time
+                    time.sleep(2 ** attempt)
+                else:
+                    logger.error("NTFY timeout exhausted retries: %s", exc)
+
+            except requests.RequestException as exc:
+                logger.error("NTFY request failed (non-retryable): %s", exc)
+                return False
+
+        return False
 
 
 # ── Module-level convenience ───────────────────────────────────────────────────

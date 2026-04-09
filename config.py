@@ -34,13 +34,14 @@ REQUEST_TIMEOUT_SECONDS = 15
 
 # ── NTFY ───────────────────────────────────────────────────────────────────────
 # NTFY topic (the part after the last / in your ntfy.sh URL)
-NTFY_TOPIC = "cnc7"
+# Change this to a private, random topic name for your machine
+NTFY_TOPIC = "cnc7-okuma-alarms"
 
-# Full NTFY publish URL
-NTFY_URL = "https://ntfy.tailf7384b.ts.net/cnc7"
+# Full NTFY publish URL (public ntfy.sh instance — safe for public repos)
+NTFY_URL = f"https://ntfy.sh/{NTFY_TOPIC}"
 
 # Optional: ntfy.sh server URL (used by the python-ntfy library)
-NTFY_SERVER = "https://ntfy.tailf7384b.ts.net"
+NTFY_SERVER = "https://ntfy.sh"
 
 # Notification priority (1=min … 5=max)
 NTFY_PRIORITY = 4
@@ -50,7 +51,7 @@ NTFY_PRIORITY = 4
 NTFY_TAGS = ["warning", "bell"]
 
 # Click action — open this URL when the notification is tapped (e.g. your NTFY dashboard)
-NTFY_CLICK = "https://ntfy.tailf7384b.ts.net"
+NTFY_CLICK = "https://ntfy.sh"
 
 # ── Logging ───────────────────────────────────────────────────────────────────
 LOG_FILE = "alarm_poller.log"
