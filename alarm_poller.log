@@ -1,0 +1,200 @@
+2026-04-06 13:40:16 [INFO] poller_service — Starting MTConnect Alarm Poller — target=http://localhost:5000/CNC_12
+2026-04-06 13:40:17 [INFO] poller — New alarm detected: <Alarm key='3710@cnc' code='3710' msg='3710 ALARM_C' state=ACTIVE>
+2026-04-06 13:40:17 [INFO] poller_service — NEW ALARM — 3710: Power saving
+2026-04-06 13:40:17 [ERROR] poller_service — NTFY (requests) failed: HTTPSConnectionPool(host='ntfy.tailf7384b.ts.net', port=443): Max retries exceeded with url: /cnc12 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1124)')))
+2026-04-06 13:44:50 [INFO] poller_service — Starting MTConnect Alarm Poller — target=http://localhost:5000/CNC_7
+2026-04-06 13:44:51 [INFO] poller — New alarm detected: <Alarm key='3710@cnc' code='3710' msg='3710 ALARM_C' state=ACTIVE>
+2026-04-06 13:44:51 [INFO] poller_service — NEW ALARM — 3710: Power saving
+2026-04-06 13:44:51 [ERROR] poller_service — NTFY (requests) failed: HTTPSConnectionPool(host='ntfy.tailf7384b.ts.net', port=443): Max retries exceeded with url: /cnc7 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1124)')))
+2026-04-06 13:53:38 [INFO] poller_service — Starting MTConnect Alarm Poller — target=http://localhost:5000/CNC_7
+2026-04-06 13:53:39 [INFO] poller — New alarm detected: <Alarm key='3710@cnc' code='3710' msg='3710 ALARM_C' state=ACTIVE>
+2026-04-06 13:53:39 [INFO] poller_service — NEW ALARM — 3710: Power saving
+2026-04-06 13:53:39 [ERROR] poller_service — NTFY (requests) failed: HTTPSConnectionPool(host='ntfy.tailf7384b.ts.net', port=443): Max retries exceeded with url: /cnc7 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1124)')))
+2026-04-06 14:01:56 [INFO] poller_service — Starting MTConnect Alarm Poller — target=http://localhost:5000/CNC_7
+2026-04-06 14:01:57 [INFO] poller — New alarm detected: <Alarm key='3710@cnc' code='3710' msg='3710 ALARM_C' state=ACTIVE>
+2026-04-06 14:01:57 [INFO] poller_service — NEW ALARM — 3710: Power saving
+2026-04-06 14:01:57 [ERROR] poller_service — NTFY (requests) failed: HTTPSConnectionPool(host='ntfy.tailf7384b.ts.net', port=443): Max retries exceeded with url: /cnc7 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1124)')))
+2026-04-06 14:15:18 [INFO] poller_service — Starting MTConnect Alarm Poller — target=http://localhost:5000/CNC_7
+2026-04-06 14:15:19 [INFO] poller — New alarm detected: <Alarm key='3710@cnc' code='3710' msg='3710 ALARM_C' state=ACTIVE>
+2026-04-06 14:15:19 [INFO] poller_service — NEW ALARM — 3710: Power saving
+2026-04-06 14:15:20 [ERROR] poller_service — NTFY (requests) failed: HTTPSConnectionPool(host='ntfy.tailf7384b.ts.net', port=443): Max retries exceeded with url: /cnc7 (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1124)')))
+2026-04-06 14:23:10 [INFO] poller_service — Starting MTConnect Alarm Poller — target=http://localhost:5000/CNC_7
+2026-04-06 14:23:11 [INFO] poller — New alarm detected: <Alarm key='3710@cnc' code='3710' msg='3710 ALARM_C' state=ACTIVE>
+2026-04-06 14:23:11 [INFO] poller_service — NEW ALARM — 3710: Power saving
+2026-04-06 14:23:11 [ERROR] poller_service — NTFY (requests) failed: HTTPSConnectionPool(host='ntfy.tailf7384b.ts.net', port=443): Max retries exceeded with url: /cnc7 (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1124)')))
+2026-04-06 14:26:43 [INFO] poller_service — Starting MTConnect Alarm Poller — target=http://localhost:5000/CNC_7
+2026-04-06 14:26:44 [INFO] poller — New alarm detected: <Alarm key='3710@cnc' code='3710' msg='3710 ALARM_C' state=ACTIVE>
+2026-04-06 14:26:44 [INFO] poller_service — NEW ALARM — 3710: Power saving
+2026-04-06 14:26:44 [ERROR] poller_service — NTFY (requests) failed: Cannot set verify_mode to CERT_NONE when check_hostname is enabled.
+2026-04-06 14:28:25 [INFO] poller_service — Starting MTConnect Alarm Poller — target=http://localhost:5000/CNC_7
+2026-04-06 14:28:26 [INFO] poller — New alarm detected: <Alarm key='3710@cnc' code='3710' msg='3710 ALARM_C' state=ACTIVE>
+2026-04-06 14:28:26 [INFO] poller_service — NEW ALARM — 3710: Power saving
+2026-04-06 14:28:26 [ERROR] poller_service — NTFY (requests) failed: Cannot set verify_mode to CERT_NONE when check_hostname is enabled.
+2026-04-06 14:32:02 [INFO] poller_service — Starting MTConnect Alarm Poller — target=http://localhost:5000/CNC_7
+2026-04-06 14:32:03 [INFO] poller — New alarm detected: <Alarm key='3710@cnc' code='3710' msg='3710 ALARM_C' state=ACTIVE>
+2026-04-06 14:32:03 [INFO] poller_service — NEW ALARM — 3710: Power saving
+2026-04-06 14:32:03 [ERROR] poller_service — NTFY (requests) failed: Cannot set verify_mode to CERT_NONE when check_hostname is enabled.
+2026-04-06 14:38:55 [INFO] poller_service — Starting MTConnect Alarm Poller — target=http://localhost:5000/CNC_7
+2026-04-06 14:38:56 [INFO] poller — New alarm detected: <Alarm key='3710@cnc' code='3710' msg='3710 ALARM_C' state=ACTIVE>
+2026-04-06 14:38:56 [INFO] poller_service — NEW ALARM — 3710: Power saving
+2026-04-06 14:38:56 [ERROR] poller_service — NTFY (requests) failed: Cannot set verify_mode to CERT_NONE when check_hostname is enabled.
+2026-04-06 14:41:52 [INFO] poller_service — Starting MTConnect Alarm Poller — target=http://localhost:5000/CNC_7
+2026-04-06 14:41:53 [INFO] poller — New alarm detected: <Alarm key='3710@cnc' code='3710' msg='3710 ALARM_C' state=ACTIVE>
+2026-04-06 14:41:53 [INFO] poller_service — NEW ALARM — 3710: Power saving
+2026-04-06 14:41:54 [INFO] poller_service — NTFY (requests) OK: Power saving
+2026-04-06 14:43:11 [INFO] poller — Alarm cleared: <Alarm key='3710@cnc' code='3710' msg='3710 ALARM_C' state=ACTIVE>
+2026-04-06 14:43:11 [INFO] poller_service — CLEARED — 3710
+2026-04-06 14:43:12 [INFO] poller_service — NTFY (requests) OK: [CLEARED] 3710
+2026-04-06 14:44:07 [INFO] poller — New alarm detected: <Alarm key='1701@cnc' code='1701' msg='1701 ALARM_A' state=ACTIVE>
+2026-04-06 14:44:07 [INFO] poller_service — NEW ALARM — 1701: Emergency stop
+2026-04-06 14:44:07 [INFO] poller_service — NTFY (requests) OK: Emergency stop
+2026-04-06 14:44:29 [INFO] poller — Alarm cleared: <Alarm key='1701@cnc' code='1701' msg='1701 ALARM_A' state=ACTIVE>
+2026-04-06 14:44:29 [INFO] poller_service — CLEARED — 1701
+2026-04-06 14:44:30 [INFO] poller_service — NTFY (requests) OK: [CLEARED] 1701
+2026-04-07 07:54:32 [INFO] poller — New alarm detected: <Alarm key='4209@cnc' code='4209' msg='4209 ALARM_D  1 PALLET 1 READY?' state=ACTIVE>
+2026-04-07 07:54:32 [INFO] poller_service — NEW ALARM — 4209: User reserve code
+2026-04-07 07:54:32 [INFO] poller_service — NTFY (requests) OK: User reserve code
+2026-04-07 07:56:22 [INFO] poller — Alarm cleared: <Alarm key='4209@cnc' code='4209' msg='4209 ALARM_D  1 PALLET 1 READY?' state=ACTIVE>
+2026-04-07 07:56:22 [INFO] poller_service — CLEARED — 4209
+2026-04-07 07:56:22 [INFO] poller_service — NTFY (requests) OK: [CLEARED] 4209
+2026-04-07 10:55:06 [INFO] poller — New alarm detected: <Alarm key='2395@cnc' code='2395' msg='2395 ALARM_B  86 PATH OBSTRUCTED' state=ACTIVE>
+2026-04-07 10:55:06 [INFO] poller_service — NEW ALARM — 2395: User reserve code
+2026-04-07 10:55:06 [INFO] poller_service — NTFY (requests) OK: User reserve code
+2026-04-07 11:36:34 [INFO] poller — Alarm cleared: <Alarm key='2395@cnc' code='2395' msg='2395 ALARM_B  86 PATH OBSTRUCTED' state=ACTIVE>
+2026-04-07 11:36:34 [INFO] poller_service — CLEARED — 2395
+2026-04-07 11:36:35 [INFO] poller_service — NTFY (requests) OK: [CLEARED] 2395
+2026-04-07 11:36:57 [INFO] poller — New alarm detected: <Alarm key='4830@cnc' code='4830' msg='4830 ALARM_D  2' state=ACTIVE>
+2026-04-07 11:36:57 [INFO] poller_service — NEW ALARM — 4830: Door interlock limit state
+2026-04-07 11:36:57 [INFO] poller_service — NTFY (requests) OK: Door interlock limit state
+2026-04-07 11:36:57 [INFO] poller — New alarm detected: <Alarm key='4366@cnc' code='4366' msg='4366-3 ALARM_D  4' state=ACTIVE>
+2026-04-07 11:36:57 [INFO] poller_service — NEW ALARM — 4366: Safety interlock speed clamping
+2026-04-07 11:36:58 [INFO] poller_service — NTFY (requests) OK: Safety interlock speed clamping
+2026-04-07 11:37:20 [INFO] poller — Alarm cleared: <Alarm key='4830@cnc' code='4830' msg='4830 ALARM_D  2' state=ACTIVE>
+2026-04-07 11:37:20 [INFO] poller_service — CLEARED — 4830
+2026-04-07 11:37:20 [INFO] poller_service — NTFY (requests) OK: [CLEARED] 4830
+2026-04-07 11:37:20 [INFO] poller — Alarm cleared: <Alarm key='4366@cnc' code='4366' msg='4366-3 ALARM_D  4' state=ACTIVE>
+2026-04-07 11:37:20 [INFO] poller_service — CLEARED — 4366
+2026-04-07 11:37:20 [INFO] poller_service — NTFY (requests) OK: [CLEARED] 4366
+2026-04-07 19:33:53 [INFO] poller — New alarm detected: <Alarm key='4209@cnc' code='4209' msg='4209 ALARM_D  1 PALLET 2 READY?' state=ACTIVE>
+2026-04-07 19:33:53 [INFO] poller_service — NEW ALARM — 4209: User reserve code
+2026-04-07 19:33:53 [ERROR] poller_service — NTFY (requests) failed: HTTPSConnectionPool(host='ntfy.tailf7384b.ts.net', port=443): Max retries exceeded with url: /cnc7 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1124)')))
+2026-04-07 19:37:44 [INFO] poller — Alarm cleared: <Alarm key='4209@cnc' code='4209' msg='4209 ALARM_D  1 PALLET 2 READY?' state=ACTIVE>
+2026-04-07 19:37:44 [INFO] poller_service — CLEARED — 4209
+2026-04-07 19:37:44 [ERROR] poller_service — NTFY (requests) failed: HTTPSConnectionPool(host='ntfy.tailf7384b.ts.net', port=443): Max retries exceeded with url: /cnc7 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1124)')))
+2026-04-07 21:00:07 [INFO] poller — New alarm detected: <Alarm key='4209@cnc' code='4209' msg='4209 ALARM_D  1 PALLET 1 READY?' state=ACTIVE>
+2026-04-07 21:00:07 [INFO] poller_service — NEW ALARM — 4209: User reserve code
+2026-04-07 21:00:10 [INFO] poller_service — NTFY (requests) OK: User reserve code
+2026-04-07 21:17:03 [INFO] poller — Alarm cleared: <Alarm key='4209@cnc' code='4209' msg='4209 ALARM_D  1 PALLET 1 READY?' state=ACTIVE>
+2026-04-07 21:17:03 [INFO] poller_service — CLEARED — 4209
+2026-04-07 21:17:03 [ERROR] poller_service — NTFY (requests) failed: HTTPSConnectionPool(host='ntfy.tailf7384b.ts.net', port=443): Max retries exceeded with url: /cnc7 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1124)')))
+2026-04-07 22:45:51 [INFO] poller — New alarm detected: <Alarm key='4209@cnc' code='4209' msg='4209 ALARM_D  1 PALLET 1 READY?' state=ACTIVE>
+2026-04-07 22:45:51 [INFO] poller_service — NEW ALARM — 4209: User reserve code
+2026-04-07 22:45:52 [ERROR] poller_service — NTFY (requests) failed: HTTPSConnectionPool(host='ntfy.tailf7384b.ts.net', port=443): Max retries exceeded with url: /cnc7 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1124)')))
+2026-04-07 22:48:26 [INFO] poller — Alarm cleared: <Alarm key='4209@cnc' code='4209' msg='4209 ALARM_D  1 PALLET 1 READY?' state=ACTIVE>
+2026-04-07 22:48:26 [INFO] poller_service — CLEARED — 4209
+2026-04-07 22:48:26 [ERROR] poller_service — NTFY (requests) failed: HTTPSConnectionPool(host='ntfy.tailf7384b.ts.net', port=443): Max retries exceeded with url: /cnc7 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1124)')))
+2026-04-07 23:32:39 [INFO] poller — New alarm detected: <Alarm key='4209@cnc' code='4209' msg='4209 ALARM_D  1 PALLET 1 READY?' state=ACTIVE>
+2026-04-07 23:32:39 [INFO] poller_service — NEW ALARM — 4209: User reserve code
+2026-04-07 23:32:39 [INFO] poller_service — NTFY (requests) OK: User reserve code
+2026-04-07 23:41:28 [INFO] poller — Alarm cleared: <Alarm key='4209@cnc' code='4209' msg='4209 ALARM_D  1 PALLET 1 READY?' state=ACTIVE>
+2026-04-07 23:41:28 [INFO] poller_service — CLEARED — 4209
+2026-04-07 23:41:28 [INFO] poller_service — NTFY (requests) OK: [CLEARED] 4209
+2026-04-07 23:41:50 [INFO] poller — New alarm detected: <Alarm key='2395@cnc' code='2395' msg='2395 ALARM_B  86 PATH OBSTRUCTED' state=ACTIVE>
+2026-04-07 23:41:50 [INFO] poller_service — NEW ALARM — 2395: User reserve code
+2026-04-07 23:41:51 [INFO] poller_service — NTFY (requests) OK: User reserve code
+2026-04-07 23:44:03 [INFO] poller — New alarm detected: <Alarm key='4830@cnc' code='4830' msg='4830 ALARM_D  2' state=ACTIVE>
+2026-04-07 23:44:03 [INFO] poller_service — NEW ALARM — 4830: Door interlock limit state
+2026-04-07 23:44:04 [INFO] poller_service — NTFY (requests) OK: Door interlock limit state
+2026-04-07 23:44:04 [INFO] poller — Alarm cleared: <Alarm key='2395@cnc' code='2395' msg='2395 ALARM_B  86 PATH OBSTRUCTED' state=ACTIVE>
+2026-04-07 23:44:04 [INFO] poller_service — CLEARED — 2395
+2026-04-07 23:44:04 [ERROR] poller_service — NTFY (requests) failed: HTTPSConnectionPool(host='ntfy.tailf7384b.ts.net', port=443): Max retries exceeded with url: /cnc7 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1124)')))
+2026-04-07 23:44:15 [INFO] poller — New alarm detected: <Alarm key='4366@cnc' code='4366' msg='4366-3 ALARM_D  5' state=ACTIVE>
+2026-04-07 23:44:15 [INFO] poller_service — NEW ALARM — 4366: Safety interlock speed clamping
+2026-04-07 23:44:15 [INFO] poller_service — NTFY (requests) OK: Safety interlock speed clamping
+2026-04-07 23:45:10 [INFO] poller — Alarm cleared: <Alarm key='4830@cnc' code='4830' msg='4830 ALARM_D  2' state=ACTIVE>
+2026-04-07 23:45:10 [INFO] poller_service — CLEARED — 4830
+2026-04-07 23:45:11 [INFO] poller_service — NTFY (requests) OK: [CLEARED] 4830
+2026-04-07 23:45:11 [INFO] poller — Alarm cleared: <Alarm key='4366@cnc' code='4366' msg='4366-3 ALARM_D  5' state=ACTIVE>
+2026-04-07 23:45:11 [INFO] poller_service — CLEARED — 4366
+2026-04-07 23:45:11 [ERROR] poller_service — NTFY (requests) failed: HTTPSConnectionPool(host='ntfy.tailf7384b.ts.net', port=443): Max retries exceeded with url: /cnc7 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1124)')))
+2026-04-07 23:45:22 [INFO] poller — New alarm detected: <Alarm key='4209@cnc' code='4209' msg='4209 ALARM_D  NOT PRESSURIZED' state=ACTIVE>
+2026-04-07 23:45:22 [INFO] poller_service — NEW ALARM — 4209: User reserve code
+2026-04-07 23:45:22 [INFO] poller_service — NTFY (requests) OK: User reserve code
+2026-04-07 23:47:01 [INFO] poller — Alarm cleared: <Alarm key='4209@cnc' code='4209' msg='4209 ALARM_D  NOT PRESSURIZED' state=ACTIVE>
+2026-04-07 23:47:01 [INFO] poller_service — CLEARED — 4209
+2026-04-07 23:47:03 [INFO] poller_service — NTFY (requests) OK: [CLEARED] 4209
+2026-04-07 23:47:14 [INFO] poller — New alarm detected: <Alarm key='4209@cnc' code='4209' msg='4209 ALARM_D  NOT PRESSURIZED' state=ACTIVE>
+2026-04-07 23:47:14 [INFO] poller_service — NEW ALARM — 4209: User reserve code
+2026-04-07 23:47:14 [INFO] poller_service — NTFY (requests) OK: User reserve code
+2026-04-07 23:47:58 [INFO] poller — Alarm cleared: <Alarm key='4209@cnc' code='4209' msg='4209 ALARM_D  NOT PRESSURIZED' state=ACTIVE>
+2026-04-07 23:47:58 [INFO] poller_service — CLEARED — 4209
+2026-04-07 23:47:58 [INFO] poller_service — NTFY (requests) OK: [CLEARED] 4209
+2026-04-07 23:48:20 [INFO] poller — New alarm detected: <Alarm key='2217@cnc' code='2217' msg='2217 ALARM_B  6D' state=ACTIVE>
+2026-04-07 23:48:20 [INFO] poller_service — NEW ALARM — 2217: Program bad direct:  use of character
+2026-04-07 23:48:21 [INFO] poller_service — NTFY (requests) OK: Program bad direct:  use of character
+2026-04-07 23:48:32 [INFO] poller — Alarm cleared: <Alarm key='2217@cnc' code='2217' msg='2217 ALARM_B  6D' state=ACTIVE>
+2026-04-07 23:48:32 [INFO] poller_service — CLEARED — 2217
+2026-04-07 23:48:32 [INFO] poller_service — NTFY (requests) OK: [CLEARED] 2217
+2026-04-07 23:48:43 [INFO] poller — New alarm detected: <Alarm key='2217@cnc' code='2217' msg='2217 ALARM_B  6D' state=ACTIVE>
+2026-04-07 23:48:43 [INFO] poller_service — NEW ALARM — 2217: Program bad direct:  use of character
+2026-04-07 23:48:44 [INFO] poller_service — NTFY (requests) OK: Program bad direct:  use of character
+2026-04-07 23:48:55 [INFO] poller — Alarm cleared: <Alarm key='2217@cnc' code='2217' msg='2217 ALARM_B  6D' state=ACTIVE>
+2026-04-07 23:48:55 [INFO] poller_service — CLEARED — 2217
+2026-04-07 23:48:55 [INFO] poller_service — NTFY (requests) OK: [CLEARED] 2217
+2026-04-07 23:51:29 [INFO] poller — New alarm detected: <Alarm key='2395@cnc' code='2395' msg='2395 ALARM_B  93 NO PROBE CONTAC' state=ACTIVE>
+2026-04-07 23:51:29 [INFO] poller_service — NEW ALARM — 2395: User reserve code
+2026-04-07 23:51:30 [INFO] poller_service — NTFY (requests) OK: User reserve code
+2026-04-07 23:52:03 [INFO] poller — New alarm detected: <Alarm key='4830@cnc' code='4830' msg='4830 ALARM_D  2' state=ACTIVE>
+2026-04-07 23:52:03 [INFO] poller_service — NEW ALARM — 4830: Door interlock limit state
+2026-04-07 23:52:04 [INFO] poller_service — NTFY (requests) OK: Door interlock limit state
+2026-04-07 23:52:04 [INFO] poller — Alarm cleared: <Alarm key='2395@cnc' code='2395' msg='2395 ALARM_B  93 NO PROBE CONTAC' state=ACTIVE>
+2026-04-07 23:52:04 [INFO] poller_service — CLEARED — 2395
+2026-04-07 23:52:04 [ERROR] poller_service — NTFY (requests) failed: HTTPSConnectionPool(host='ntfy.tailf7384b.ts.net', port=443): Max retries exceeded with url: /cnc7 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1124)')))
+2026-04-07 23:52:15 [INFO] poller — New alarm detected: <Alarm key='4366@cnc' code='4366' msg='4366-3 ALARM_D  5' state=ACTIVE>
+2026-04-07 23:52:15 [INFO] poller_service — NEW ALARM — 4366: Safety interlock speed clamping
+2026-04-07 23:52:16 [INFO] poller_service — NTFY (requests) OK: Safety interlock speed clamping
+2026-04-07 23:53:00 [INFO] poller — Alarm cleared: <Alarm key='4830@cnc' code='4830' msg='4830 ALARM_D  2' state=ACTIVE>
+2026-04-07 23:53:00 [INFO] poller_service — CLEARED — 4830
+2026-04-07 23:53:01 [INFO] poller_service — NTFY (requests) OK: [CLEARED] 4830
+2026-04-07 23:53:01 [INFO] poller — Alarm cleared: <Alarm key='4366@cnc' code='4366' msg='4366-3 ALARM_D  5' state=ACTIVE>
+2026-04-07 23:53:01 [INFO] poller_service — CLEARED — 4366
+2026-04-07 23:53:01 [ERROR] poller_service — NTFY (requests) failed: HTTPSConnectionPool(host='ntfy.tailf7384b.ts.net', port=443): Max retries exceeded with url: /cnc7 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1124)')))
+2026-04-08 00:37:14 [INFO] poller — New alarm detected: <Alarm key='4209@cnc' code='4209' msg='4209 ALARM_D  1 PALLET 1 READY?' state=ACTIVE>
+2026-04-08 00:37:14 [INFO] poller_service — NEW ALARM — 4209: User reserve code
+2026-04-08 00:37:15 [INFO] poller_service — NTFY (requests) OK: User reserve code
+2026-04-08 00:52:50 [INFO] poller — Alarm cleared: <Alarm key='4209@cnc' code='4209' msg='4209 ALARM_D  1 PALLET 1 READY?' state=ACTIVE>
+2026-04-08 00:52:50 [INFO] poller_service — CLEARED — 4209
+2026-04-08 00:52:50 [ERROR] poller_service — NTFY (requests) failed: HTTPSConnectionPool(host='ntfy.tailf7384b.ts.net', port=443): Max retries exceeded with url: /cnc7 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1124)')))
+2026-04-08 01:37:15 [INFO] poller — New alarm detected: <Alarm key='4209@cnc' code='4209' msg='4209 ALARM_D  1 PALLET 1 READY?' state=ACTIVE>
+2026-04-08 01:37:15 [INFO] poller_service — NEW ALARM — 4209: User reserve code
+2026-04-08 01:37:15 [ERROR] poller_service — NTFY (requests) failed: HTTPSConnectionPool(host='ntfy.tailf7384b.ts.net', port=443): Max retries exceeded with url: /cnc7 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1124)')))
+2026-04-08 01:48:48 [INFO] poller — Alarm cleared: <Alarm key='4209@cnc' code='4209' msg='4209 ALARM_D  1 PALLET 1 READY?' state=ACTIVE>
+2026-04-08 01:48:48 [INFO] poller_service — CLEARED — 4209
+2026-04-08 01:48:48 [ERROR] poller_service — NTFY (requests) failed: HTTPSConnectionPool(host='ntfy.tailf7384b.ts.net', port=443): Max retries exceeded with url: /cnc7 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1124)')))
+2026-04-08 02:33:13 [INFO] poller — New alarm detected: <Alarm key='4209@cnc' code='4209' msg='4209 ALARM_D  1 PALLET 1 READY?' state=ACTIVE>
+2026-04-08 02:33:13 [INFO] poller_service — NEW ALARM — 4209: User reserve code
+2026-04-08 02:33:13 [ERROR] poller_service — NTFY (requests) failed: HTTPSConnectionPool(host='ntfy.tailf7384b.ts.net', port=443): Max retries exceeded with url: /cnc7 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1124)')))
+2026-04-08 02:45:30 [INFO] poller — Alarm cleared: <Alarm key='4209@cnc' code='4209' msg='4209 ALARM_D  1 PALLET 1 READY?' state=ACTIVE>
+2026-04-08 02:45:30 [INFO] poller_service — CLEARED — 4209
+2026-04-08 02:45:31 [INFO] poller_service — NTFY (requests) OK: [CLEARED] 4209
+2026-04-08 03:29:55 [INFO] poller — New alarm detected: <Alarm key='4209@cnc' code='4209' msg='4209 ALARM_D  1 PALLET 1 READY?' state=ACTIVE>
+2026-04-08 03:29:55 [INFO] poller_service — NEW ALARM — 4209: User reserve code
+2026-04-08 03:29:55 [ERROR] poller_service — NTFY (requests) failed: HTTPSConnectionPool(host='ntfy.tailf7384b.ts.net', port=443): Max retries exceeded with url: /cnc7 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1124)')))
+2026-04-08 03:50:50 [INFO] poller — Alarm cleared: <Alarm key='4209@cnc' code='4209' msg='4209 ALARM_D  1 PALLET 1 READY?' state=ACTIVE>
+2026-04-08 03:50:50 [INFO] poller_service — CLEARED — 4209
+2026-04-08 03:50:51 [INFO] poller_service — NTFY (requests) OK: [CLEARED] 4209
+2026-04-08 04:35:16 [INFO] poller — New alarm detected: <Alarm key='4209@cnc' code='4209' msg='4209 ALARM_D  1 PALLET 1 READY?' state=ACTIVE>
+2026-04-08 04:35:16 [INFO] poller_service — NEW ALARM — 4209: User reserve code
+2026-04-08 04:35:16 [ERROR] poller_service — NTFY (requests) failed: HTTPSConnectionPool(host='ntfy.tailf7384b.ts.net', port=443): Max retries exceeded with url: /cnc7 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1124)')))
+2026-04-08 04:48:51 [INFO] poller — Alarm cleared: <Alarm key='4209@cnc' code='4209' msg='4209 ALARM_D  1 PALLET 1 READY?' state=ACTIVE>
+2026-04-08 04:48:51 [INFO] poller_service — CLEARED — 4209
+2026-04-08 04:48:51 [INFO] poller_service — NTFY (requests) OK: [CLEARED] 4209
+2026-04-08 05:33:15 [INFO] poller — New alarm detected: <Alarm key='4209@cnc' code='4209' msg='4209 ALARM_D  1 PALLET 1 READY?' state=ACTIVE>
+2026-04-08 05:33:15 [INFO] poller_service — NEW ALARM — 4209: User reserve code
+2026-04-08 05:33:15 [ERROR] poller_service — NTFY (requests) failed: HTTPSConnectionPool(host='ntfy.tailf7384b.ts.net', port=443): Max retries exceeded with url: /cnc7 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1124)')))
+2026-04-08 05:50:41 [INFO] poller — Alarm cleared: <Alarm key='4209@cnc' code='4209' msg='4209 ALARM_D  1 PALLET 1 READY?' state=ACTIVE>
+2026-04-08 05:50:41 [INFO] poller_service — CLEARED — 4209
+2026-04-08 05:50:42 [INFO] poller_service — NTFY (requests) OK: [CLEARED] 4209
+2026-04-08 06:44:28 [INFO] poller — New alarm detected: <Alarm key='4209@cnc' code='4209' msg='4209 ALARM_D  1 PALLET 1 READY?' state=ACTIVE>
+2026-04-08 06:44:28 [INFO] poller_service — NEW ALARM — 4209: User reserve code
+2026-04-08 06:44:28 [ERROR] poller_service — NTFY (requests) failed: HTTPSConnectionPool(host='ntfy.tailf7384b.ts.net', port=443): Max retries exceeded with url: /cnc7 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1124)')))
