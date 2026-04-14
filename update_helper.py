@@ -5,6 +5,7 @@ Called by update.bat. Downloads latest from GitHub and updates files.
 """
 
 import urllib.request
+import ssl
 import zipfile
 import os
 import shutil
@@ -15,6 +16,8 @@ import argparse
 def download_zip(url, output_path):
     """Download ZIP from GitHub."""
     try:
+        # Bypass SSL certificate verification (needed for industrial Windows machines)
+        ssl._create_default_https_context = ssl._create_unverified_context
         urllib.request.urlretrieve(url, output_path)
         print(f"Download successful: {url}")
         return True

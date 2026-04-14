@@ -416,14 +416,31 @@ class AlarmPoller:
 
             # NEW: Enhance user reserve code alarms with custom message from alarm text
             # VDOUT values are masked (****) in XML, but custom message is in alarm text
+            # Pattern 1: "User reserve code 1 'SELECT RESTART'; ..."
+            # Pattern 2: "4209 User reserve code 1 SELECT RESTART" (new machine format)
             if "User reserve code" in alarm.native_message:
-                # Extract custom message like 'SELECT RESTART' from the alarm text
-                # Format: "User reserve code 1 'SELECT RESTART'; ..."
+                # Try multiple patterns for extracting the custom message
+                custom_msg = None
+                
+                # Pattern 1: Single quotes around message
                 match = re.search(r"User reserve code \d+ '([^']+)'", alarm.native_message)
                 if match:
                     custom_msg = match.group(1)
+                
+                # Pattern 2: Code followed by "User reserve code N <message>"
+                # Format: "4209 User reserve code 1 SELECT RESTART" or similar
+                if not custom_msg:
+                    match = re.search(r"User reserve code\s+\d+\s+(.+?)(?:\s*;|\s*$)", alarm.native_message, re.IGNORECASE)
+                    if match:
+                        custom_msg = match.group(1).strip()
+                
+                if custom_msg:
                     alarm.native_message = f"[{alarm.native_code}] {custom_msg}"
                     logger.info("Enhanced user reserve alarm: %s", alarm.native_message)
+                else:
+                    # Fallback: just add brackets around code for consistent formatting
+                    alarm.native_message = f"[{alarm.native_code}] {alarm.native_message}"
+                    logger.info("Enhanced user reserve alarm (fallback): %s", alarm.native_message)
 
             return alarm
 
