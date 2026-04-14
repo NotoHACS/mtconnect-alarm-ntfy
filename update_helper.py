@@ -76,7 +76,7 @@ def main():
     args = parser.parse_args()
     
     branch = args.branch
-    zip_url = f"https://github.com/NotoHACS/mtconnect-alarm-monitor-classic/archive/refs/heads/{branch}.zip"
+    zip_url = f"https://github.com/NotoHACS/mtconnect-alarm-ntfy/archive/refs/heads/{branch}.zip"
     temp_zip = "update_temp.zip"
     extract_path = "update_temp"
     
