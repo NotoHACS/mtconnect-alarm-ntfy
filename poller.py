@@ -24,7 +24,90 @@ from config import (
 )
 from models import Alarm
 
+# Handle optional config values with defaults (backwards compatibility)
+try:
+    from config import ALARM_MIN_LIFETIME_SECONDS
+except ImportError:
+    ALARM_MIN_LIFETIME_SECONDS = 10.0  # Default: suppress alarms clearing faster than 10s
+
+try:
+    from config import MISLOAD_ALARM_CODES
+except ImportError:
+    MISLOAD_ALARM_CODES = []  # Default: no misload codes configured
+
 logger = logging.getLogger(__name__)
+
+
+# ── Misload Detection Helper ────────────────────────────────────────────────────
+
+class MisloadDetector:
+    """
+    Detects "blinking" alarms (on/off within seconds) and suppresses spam.
+
+    - Tracks when alarms first appear
+    - Suppresses "cleared" events for alarms that clear too quickly
+    - Can identify misload conditions and send custom message instead
+    """
+
+    def __init__(self, min_lifetime: float = 10.0, misload_codes: Optional[Set[str]] = None):
+        self._min_lifetime = min_lifetime  # seconds before cleared is reported
+        self._misload_codes = misload_codes or set()  # alarm codes indicating misload
+        self._alarm_first_seen: Dict[str, float] = {}  # key -> timestamp
+        self._misload_detected: Dict[str, bool] = {}   # key -> is misload
+
+    def on_alarm_active(self, alarm: Alarm) -> Optional[str]:
+        """
+        Called when alarm becomes active.
+        Returns 'misload' if this is a misload condition, None otherwise.
+        """
+        import time
+        now = time.time()
+
+        # Track first seen time
+        if alarm.key not in self._alarm_first_seen:
+            self._alarm_first_seen[alarm.key] = now
+
+        # Check if this is a misload alarm code
+        if alarm.native_code in self._misload_codes:
+            if alarm.key not in self._misload_detected:
+                self._misload_detected[alarm.key] = True
+                return "misload"
+
+        return None
+
+    def on_alarm_cleared(self, alarm: Alarm) -> tuple[bool, Optional[str]]:
+        """
+        Called when alarm clears.
+        Returns (should_report, custom_message):
+          - should_report: True if we should notify, False if suppressed
+          - custom_message: Optional custom message (e.g., "MISLOAD CLEARED")
+        """
+        import time
+        now = time.time()
+
+        # Calculate how long alarm was active
+        first_seen = self._alarm_first_seen.get(alarm.key, now)
+        lifetime = now - first_seen
+
+        # Check if this was a misload that is now cleared
+        is_misload = self._misload_detected.pop(alarm.key, False)
+        self._alarm_first_seen.pop(alarm.key, None)
+
+        # Suppress if cleared too quickly
+        if lifetime < self._min_lifetime:
+            logger.info("Suppressing cleared alarm %s (lifetime %.1fs < %.1fs)",
+                       alarm.key, lifetime, self._min_lifetime)
+            return False, None
+
+        # Was a misload that stayed active long enough
+        if is_misload:
+            return True, "MISLOAD CLEARED - Casting misloaded in workholding"
+
+        return True, None
+
+    def get_misload_message(self, alarm: Alarm) -> str:
+        """Get the custom misload message."""
+        return "🚨 MISLOAD DETECTED - Casting misloaded in workholding"
 
 
 # ── AlarmPoller ────────────────────────────────────────────────────────────────
@@ -59,6 +142,12 @@ class AlarmPoller:
         adapter = HTTPAdapter(max_retries=retry)
         self._session.mount("http://", adapter)
         self._session.headers.update({"Accept": "application/xml"})
+
+        # Initialize misload detector from config
+        self._misload_detector = MisloadDetector(
+            min_lifetime=ALARM_MIN_LIFETIME_SECONDS,
+            misload_codes=set(MISLOAD_ALARM_CODES) if MISLOAD_ALARM_CODES else set()
+        )
 
     # ── Public API ────────────────────────────────────────────────────────────
 
@@ -97,13 +186,34 @@ class AlarmPoller:
         for key in current_active - previously_active:
             alarm = next(a for a in alarms if a.key == key)
             self._active_alarms[key] = alarm
-            logger.info("New alarm detected: %s", alarm)
+
+            # Check if this is a misload condition
+            misload_type = self._misload_detector.on_alarm_active(alarm)
+            if misload_type == "misload":
+                # Replace with custom misload message
+                alarm.native_message = self._misload_detector.get_misload_message(alarm)
+                alarm.native_code = "MISLOAD"
+                logger.info("MISLOAD DETECTED: %s", alarm)
+            else:
+                logger.info("New alarm detected: %s", alarm)
+
             yield {"type": "new", "alarm": alarm}
 
         # ── 2. Alarms that have cleared (in tracked set, not in current) ──────
         for key in previously_active - current_active:
             cleared_alarm = self._active_alarms.pop(key)
-            logger.info("Alarm cleared: %s", cleared_alarm)
+
+            # Check if we should report this cleared event
+            should_report, custom_msg = self._misload_detector.on_alarm_cleared(cleared_alarm)
+            if not should_report:
+                continue  # Suppressed (cleared too quickly)
+
+            if custom_msg:
+                cleared_alarm.native_message = custom_msg
+                logger.info("MISLOAD CLEARED: %s", cleared_alarm)
+            else:
+                logger.info("Alarm cleared: %s", cleared_alarm)
+
             yield {"type": "cleared", "alarm": cleared_alarm}
 
         # ── 3. Reactivated alarms (key existed but alarm object changed) ──────
@@ -116,7 +226,7 @@ class AlarmPoller:
                 logger.info("Alarm reactivated/changed: %s", new_alarm)
                 yield {"type": "reactivated", "alarm": new_alarm}
 
-        # ── 4. Still-active alarms — update stored object (new timestamp, etc.) ─
+        # ── 4. Still-active alarms - update stored object (new timestamp, etc.) ─
         for key in current_active & previously_active:
             self._active_alarms[key] = next(a for a in alarms if a.key == key)
 
@@ -171,16 +281,24 @@ class AlarmPoller:
 
         MTConnect uses <Condition> blocks inside ComponentStream.
         The four condition states are element names:
-          <Normal/>        — healthy, no alarm
-          <Warning/>       — caution state
-          <Fault/>         — active alarm
-          <Unavailable/>   — condition unknown
+          <Normal/>        - healthy, no alarm
+          <Warning/>       - caution state
+          <Fault/>         - active alarm
+          <Unavailable/>   - condition unknown
 
         We look for <Fault> and <Warning> elements specifically, plus any
         element that carries a nativeCode attribute.
+
+        NEW: Also extracts VDOUT/VACUM data for Okuma user reserve codes to
+        provide additional context about custom alarms.
         """
         alarms: List[Alarm] = []
 
+        # First pass: extract VDOUT/VACUM data for correlation
+        vdout_data = self._extract_vdout_data(root)
+        vacum_data = self._extract_vacum_data(root)
+        
+        # Second pass: extract alarms
         for elem in root.iter():
             # Strip namespace prefix if present
             tag_local = elem.tag.split("}")[-1] if "}" in elem.tag else elem.tag
@@ -196,11 +314,65 @@ class AlarmPoller:
 
         return alarms
 
+    def _extract_vdout_data(self, root) -> Dict[str, str]:
+        """
+        Extract VDOUT variable values from the XML.
+        VDOUT[990-993] are Okuma user reserve code outputs.
+        Returns dict: {"VDOUT990": "1234", "VDOUT991": "5678", ...}
+        """
+        vdout_data: Dict[str, str] = {}
+
+        for elem in root.iter():
+            tag_local = elem.tag.split("}")[-1] if "}" in elem.tag else elem.tag
+
+            # Look for VDOUT data items or similar
+            if tag_local in ("VDOUT", "Sample"):
+                # Try to get the data item name
+                data_item_id = elem.get("dataItemId", "")
+                if "VDOUT" in data_item_id.upper():
+                    # Extract the VDOUT number and value
+                    match = re.search(r'VDOUT\[(\d+)\]', data_item_id, re.IGNORECASE)
+                    if match:
+                        vdout_num = match.group(1)
+                        value = elem.get("value", "").strip()
+                        if value and value != "UNAVAILABLE":
+                            vdout_data[f"VDOUT{vdout_num}"] = value
+                            logger.debug("Found VDOUT[%s] = %s", vdout_num, value)
+
+        return vdout_data
+
+    def _extract_vacum_data(self, root) -> Dict[str, str]:
+        """
+        Extract VACUM variable values (custom messages) from the XML.
+        VACUM variables hold the 16-character custom alarm messages.
+        Returns dict: {"VACUM1234": "CASTING MISLOAD", ...}
+        """
+        vacum_data: Dict[str, str] = {}
+
+        for elem in root.iter():
+            tag_local = elem.tag.split("}")[-1] if "}" in elem.tag else elem.tag
+
+            # Look for VACUM data items or similar
+            if tag_local in ("VACUM", "Sample", "Event"):
+                data_item_id = elem.get("dataItemId", "")
+                if "VACUM" in data_item_id.upper():
+                    # Extract VACUM number and message
+                    match = re.search(r'VACUM\[(\d+)\]', data_item_id, re.IGNORECASE)
+                    if match:
+                        vacum_num = match.group(1)
+                        # Get value from text or attribute
+                        value = elem.text.strip() if elem.text else elem.get("value", "")
+                        if value and value != "UNAVAILABLE":
+                            vacum_data[f"VACUM{vacum_num}"] = value
+                            logger.debug("Found VACUM[%s] = '%s'", vacum_num, value)
+
+        return vacum_data
+
     def _elem_to_alarm(self, elem, tag_local: str = "") -> Optional[Alarm]:
         """
         Convert a single XML element to an Alarm.
 
-        For Condition elements (<Fault>, <Warning>), the element name
+        For Condition-type elements (<Fault>, <Warning>), the element name
         determines the alarm state. For other elements, check 'state' attr.
         """
         try:
@@ -241,6 +413,17 @@ class AlarmPoller:
             # Default component name
             if not alarm.component or alarm.component == "Unknown":
                 alarm.component = "CNC"
+
+            # NEW: Enhance user reserve code alarms with custom message from alarm text
+            # VDOUT values are masked (****) in XML, but custom message is in alarm text
+            if "User reserve code" in alarm.native_message:
+                # Extract custom message like 'SELECT RESTART' from the alarm text
+                # Format: "User reserve code 1 'SELECT RESTART'; ..."
+                match = re.search(r"User reserve code \d+ '([^']+)'", alarm.native_message)
+                if match:
+                    custom_msg = match.group(1)
+                    alarm.native_message = f"[{alarm.native_code}] {custom_msg}"
+                    logger.info("Enhanced user reserve alarm: %s", alarm.native_message)
 
             return alarm
 

@@ -57,6 +57,35 @@ python main.py
 
 ---
 
+## Updating
+
+To get the latest version without losing your configuration:
+
+```bash
+update.bat
+```
+
+This will:
+1. Download the latest code from GitHub
+2. Update all program files
+3. **Preserve your `config_local.py` settings**
+
+No need to reconfigure after updates!
+
+---
+
+## Configuration Files
+
+| File | Purpose | Edit? |
+|------|---------|-------|
+| `config.py` | Import wrapper | **No** |
+| `config_defaults.py` | Default values | **No** |
+| `config_local.py` | **Your settings** | Yes |
+
+`setup.py` creates `config_local.py` with your machine-specific settings. This file is preserved during updates.
+
+---
+
 ## Manual Configuration
 
 If you prefer to edit `config.py` directly:
@@ -109,6 +138,32 @@ Optional:
 1. Install the [ntfy Android app](https://f-droid.org/en/packages/io.heckel.ntfy/) or use the web
 2. Subscribe to your topic: `https://ntfy.sh/your-topic-name`
 3. Test it: visit the URL in a browser
+
+---
+
+## Features
+
+### User Reserve Code Enhancement
+
+Okuma user reserve codes (alarms 2395, 4209, etc.) now display their custom messages instead of generic "VDOUT=****" text.
+
+**Before:** `VDOUT[990]=**** is specified in a program.`  
+**After:** `[4209] SELECT RESTART`
+
+The custom message is extracted directly from the alarm text sent by your Okuma CNC.
+
+### Misload Detection
+
+Alarms that clear within 10 seconds are suppressed to prevent notification spam during misload conditions. You'll see one consolidated message instead of rapid on/off notifications.
+
+Configure which alarm codes indicate misload in `config_local.py`:
+```python
+MISLOAD_ALARM_CODES = ["4209", "2395"]  # Your misload alarm codes
+```
+
+### Automatic Updates
+
+Run `update.bat` anytime to get the latest features without reconfiguring. Your settings in `config_local.py` are preserved automatically.
 
 ---
 

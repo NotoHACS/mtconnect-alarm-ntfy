@@ -63,18 +63,20 @@ def _format_title(event_type: str, alarm: Alarm) -> str:
 
 def _format_message(alarm: Alarm) -> str:
     """
-    Body text matching the machine's alarm screen format::
+    Body text matching the machine's alarm screen format.
 
-        ALARM_A
-        Emergency stop
-
-    Parses the native_message text (e.g. '1701 ALARM_A') to extract
-    just the alarm class (ALARM_A) and description.
+    For enhanced user reserve codes (format: "[4209] SELECT RESTART"),
+    uses the full native_message directly to preserve the code.
+    For legacy format ("1701 ALARM_A"), extracts the alarm class.
     """
     msg = alarm.native_message or ""
 
-    # native_message typically contains: "1701 ALARM_A" or "1701 ALARM_A\nSome description"
-    # Extract everything after the alarm code (first token) for the description
+    # Check for enhanced format: "[4209] SELECT RESTART"
+    # User reserve codes have the code in brackets - use full message
+    if msg.startswith("[") and "]" in msg:
+        return msg.strip()
+
+    # Legacy format: "1701 ALARM_A" or "1701 ALARM_A\nSome description"
     parts = msg.split(None, 1)
     if len(parts) > 1:
         description = parts[1].strip()

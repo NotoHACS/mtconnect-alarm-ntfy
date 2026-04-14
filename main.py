@@ -140,6 +140,13 @@ def _format_title(alarm: Alarm) -> str:
 
 def _format_body(alarm: Alarm) -> str:
     """Get alarm body text."""
+    # Check for enhanced format first (user reserve codes with custom message)
+    msg = alarm.native_message or ""
+    if msg.startswith("[") and "]" in msg:
+        # Enhanced format: [4209] SELECT RESTART
+        return msg.strip()
+
+    # Fall back to database lookup
     if alarm.native_code:
         db = _lookup_alarm(alarm.native_code)
         if db:
@@ -148,7 +155,8 @@ def _format_body(alarm: Alarm) -> str:
             parts = [f"[Level {level}]"] if level else []
             parts.append(desc)
             return " ".join(parts)
-    msg = alarm.native_message or ""
+
+    # Final fallback to native_message
     lines = msg.split("\n")
     return lines[1].strip() if len(lines) > 1 else msg
 
