@@ -334,6 +334,13 @@ POLL_INTERVAL_SECONDS = {poll_interval}
 NTFY_TOPIC = "{ntfy_topic}"
 NTFY_URL = f"{ntfy_server}/{{NTFY_TOPIC}}"
 NTFY_SERVER = "{ntfy_server}"
+NTFY_PRIORITY = 4
+NTFY_TAGS = ["warning", "bell"]
+NTFY_CLICK = "{ntfy_server}"
+
+# -- Logging ------------------------------------------------------------------
+LOG_FILE = "alarm_poller.log"
+LOG_LEVEL = "INFO"
 '''
 
     config_content += f'''
