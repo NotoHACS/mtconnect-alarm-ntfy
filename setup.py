@@ -329,6 +329,7 @@ MTCONNECT_DEVICE = "{mtconnect_device}"
 
 # -- Polling Settings -----------------------------------------------------------
 POLL_INTERVAL_SECONDS = {poll_interval}
+REQUEST_TIMEOUT_SECONDS = 15
 
 # -- NTFY ---------------------------------------------------------------------
 NTFY_TOPIC = "{ntfy_topic}"
