@@ -10,7 +10,7 @@ MTCONNECT_URL = f"http://{MTCONNECT_HOST}:{MTCONNECT_PORT}"
 # Set this to the <Device> name from your MTConnect XML if multiple devices share an IP
 MTCONNECT_DEVICE = ""  # Empty = accept all devices (single CNC per IP)
 
-POLL_INTERVAL_SECONDS = 10
+POLL_INTERVAL_SECONDS = 5
 REQUEST_TIMEOUT_SECONDS = 15
 
 # ── NTFY ───────────────────────────────────────────────────────────────────────
@@ -30,7 +30,7 @@ LOG_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 # ── Alarm Filtering ───────────────────────────────────────────────────────────
 # Minimum time an alarm must be active before notifying (seconds)
 # Alarms that clear faster than this are silently discarded
-ALARM_MIN_LIFETIME_SECONDS = 10.0
+ALARM_MIN_LIFETIME_SECONDS = 15.0
 
 # Alarm codes to completely suppress (never notify)
 # Example: ["1234", "5678"]  # <-- Set this in config_local.py
