@@ -47,6 +47,7 @@ def update_files(source_dir):
         'notifier.py',
         'config.py',
         'config_defaults.py',
+        'setup.py',  # Include setup.py so wizard updates are available
         'SPEC.md',
         'alarm_db.json',
         'requirements.txt',
