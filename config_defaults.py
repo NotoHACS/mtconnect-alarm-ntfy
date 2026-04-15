@@ -27,12 +27,11 @@ LOG_LEVEL = "INFO"
 LOG_FORMAT = "%(asctime)s [%(levelname)s] %(name)s — %(message)s"
 LOG_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
-# ── Misload Detection ─────────────────────────────────────────────────────────
-# Minimum time an alarm must be active before reporting "cleared" (seconds)
-# Alarms that clear faster than this are suppressed (spam prevention)
+# ── Alarm Filtering ───────────────────────────────────────────────────────────
+# Minimum time an alarm must be active before notifying (seconds)
+# Alarms that clear faster than this are silently discarded
 ALARM_MIN_LIFETIME_SECONDS = 10.0
 
-# Alarm codes that indicate a misload condition
-# When these alarms blink on/off, send "MISLOAD DETECTED" instead of spam
-# Example: ["2395", "4209"]  # <-- Set this in config_local.py
-MISLOAD_ALARM_CODES = []
+# Alarm codes to completely suppress (never notify)
+# Example: ["1234", "5678"]  # <-- Set this in config_local.py
+SUPPRESS_CODES = []

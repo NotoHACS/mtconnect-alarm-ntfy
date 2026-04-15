@@ -10,6 +10,7 @@ Responsible for:
 
 import logging
 import re
+import time
 import xml.etree.ElementTree as ET
 from typing import Set, Dict, List, Optional
 
@@ -29,11 +30,6 @@ try:
     from config import ALARM_MIN_LIFETIME_SECONDS
 except ImportError:
     ALARM_MIN_LIFETIME_SECONDS = 10.0  # Default: suppress alarms clearing faster than 10s
-
-try:
-    from config import MISLOAD_ALARM_CODES
-except ImportError:
-    MISLOAD_ALARM_CODES = []  # Default: no misload codes configured
 
 logger = logging.getLogger(__name__)
 
@@ -131,6 +127,8 @@ class AlarmPoller:
         self._url = f"{MTCONNECT_URL}/current"
         # active_alarms maps Alarm.key → Alarm instance
         self._active_alarms: Dict[str, Alarm] = {}
+        self._alarm_first_seen: Dict[str, float] = {}  # key -> timestamp
+        self._notified_active: Set[str] = set()  # keys already notified
 
         # Track which device name/path the agent uses so we can find alarms
         self._device_name = MTCONNECT_DEVICE
@@ -143,11 +141,7 @@ class AlarmPoller:
         self._session.mount("http://", adapter)
         self._session.headers.update({"Accept": "application/xml"})
 
-        # Initialize misload detector from config
-        self._misload_detector = MisloadDetector(
-            min_lifetime=ALARM_MIN_LIFETIME_SECONDS,
-            misload_codes=set(MISLOAD_ALARM_CODES) if MISLOAD_ALARM_CODES else set()
-        )
+
 
     # ── Public API ────────────────────────────────────────────────────────────
 
@@ -183,38 +177,37 @@ class AlarmPoller:
         previously_active = set(self._active_alarms.keys())
 
         # ── 1. Alarms that are new (active now, not in our tracked set) ──────
+        # Track new alarms silently, don't notify yet
         for key in current_active - previously_active:
             alarm = next(a for a in alarms if a.key == key)
             self._active_alarms[key] = alarm
+            self._alarm_first_seen[key] = time.time()  # Track when first seen
+            logger.info("Alarm detected (pending): %s", alarm)
 
-            # Check if this is a misload condition
-            misload_type = self._misload_detector.on_alarm_active(alarm)
-            if misload_type == "misload":
-                # Replace with custom misload message
-                alarm.native_message = self._misload_detector.get_misload_message(alarm)
-                alarm.native_code = "MISLOAD"
-                logger.info("MISLOAD DETECTED: %s", alarm)
-            else:
-                logger.info("New alarm detected: %s", alarm)
-
-            yield {"type": "new", "alarm": alarm}
+        # Check pending alarms - notify if lifetime >= min_lifetime
+        for key in list(self._active_alarms.keys()):
+            if key in self._notified_active:
+                continue
+            first_seen = self._alarm_first_seen.get(key, 0)
+            lifetime = time.time() - first_seen
+            if lifetime >= ALARM_MIN_LIFETIME_SECONDS:
+                self._notified_active.add(key)
+                alarm = self._active_alarms[key]
+                logger.info("Alarm active (notifying): %s", alarm)
+                yield {"type": "new", "alarm": alarm}
 
         # ── 2. Alarms that have cleared (in tracked set, not in current) ──────
         for key in previously_active - current_active:
             cleared_alarm = self._active_alarms.pop(key)
-
-            # Check if we should report this cleared event
-            should_report, custom_msg = self._misload_detector.on_alarm_cleared(cleared_alarm)
-            if not should_report:
-                continue  # Suppressed (cleared too quickly)
-
-            if custom_msg:
-                cleared_alarm.native_message = custom_msg
-                logger.info("MISLOAD CLEARED: %s", cleared_alarm)
-            else:
+            self._alarm_first_seen.pop(key, None)
+            was_notified = key in self._notified_active
+            self._notified_active.discard(key)
+            
+            if was_notified:
                 logger.info("Alarm cleared: %s", cleared_alarm)
-
-            yield {"type": "cleared", "alarm": cleared_alarm}
+                yield {"type": "cleared", "alarm": cleared_alarm}
+            else:
+                logger.info("Alarm cleared silently (too fast): %s", cleared_alarm.key)
 
         # ── 3. Reactivated alarms (key existed but alarm object changed) ──────
         for key in current_active & previously_active:
