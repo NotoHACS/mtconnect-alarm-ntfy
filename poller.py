@@ -31,6 +31,11 @@ try:
 except ImportError:
     ALARM_MIN_LIFETIME_SECONDS = 10.0  # Default: suppress alarms clearing faster than 10s
 
+try:
+    from config import SUPPRESS_CODES
+except ImportError:
+    SUPPRESS_CODES = []  # Default: no codes suppressed
+
 logger = logging.getLogger(__name__)
 
 
@@ -193,6 +198,10 @@ class AlarmPoller:
             if lifetime >= ALARM_MIN_LIFETIME_SECONDS:
                 self._notified_active.add(key)
                 alarm = self._active_alarms[key]
+                # Check if alarm should be suppressed
+                if alarm.native_code in SUPPRESS_CODES:
+                    logger.debug("Alarm %s suppressed (in SUPPRESS_CODES)", alarm.native_code)
+                    continue  # Skip notification
                 logger.info("Alarm active (notifying): %s", alarm)
                 yield {"type": "new", "alarm": alarm}
 
