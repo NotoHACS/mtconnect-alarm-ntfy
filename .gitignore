@@ -25,3 +25,7 @@ Thumbs.db
 
 # Project specific - generated at runtime
 alarm_db.json
+
+# Machine-specific local config (copy from config_local_*_example.py)
+# Each machine should have its own config_local.py that is NOT committed
+config_local.py
