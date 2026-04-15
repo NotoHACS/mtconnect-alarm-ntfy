@@ -266,35 +266,35 @@ def main():
         help_text="Must be a number (seconds)"
     )
 
-    # -- Misload Detection ------------------------------------------------------
-    print_section("Step 4: Misload Detection (Optional)")
-    print("Detect 'blinking' alarms and suppress spam notifications.")
-    print("Useful for alarms like 'PART NOT SEATED' that indicate casting misloads.")
+    # -- Alarm Filtering ------------------------------------------------------
+    print_section("Step 4: Alarm Filtering (Optional)")
+    print("Suppress specific alarm codes and prevent spam notifications.")
+    print("Useful for filtering out nuisance alarms or alarms that blink quickly.")
     print()
 
-    misload_codes = []
-    alarm_min_lifetime = "10.0"
+    suppress_codes = []
+    alarm_min_lifetime = "15.0"
 
-    if ask_yes_no("Enable misload detection?", default="no"):
-        print("\nEnter alarm codes that indicate misload conditions.")
-        print("Example: 4209 (PART NOT SEATED), 2395")
+    if ask_yes_no("Enable alarm suppression?", default="no"):
+        print("\nEnter alarm codes to completely suppress (never notify).")
+        print("Example: 1234, 5678")
         print("Enter multiple codes separated by commas, or 'none' for none.")
         print()
 
         codes_input = ask(
-            "Misload alarm codes",
-            default="4209",
-            help_text="Comma-separated list of alarm codes (e.g., 4209,2395)"
+            "Suppress codes",
+            default="none",
+            help_text="Comma-separated list of alarm codes to suppress"
         )
 
         if codes_input.lower() != "none":
-            misload_codes = [c.strip() for c in codes_input.split(",") if c.strip()]
+            suppress_codes = [c.strip() for c in codes_input.split(",") if c.strip()]
 
-        alarm_min_lifetime = ask(
-            "Minimum alarm lifetime (seconds) before reporting 'cleared'",
-            default="10.0",
-            help_text="Alarms that clear faster than this are suppressed"
-        )
+    alarm_min_lifetime = ask(
+        "Minimum alarm lifetime (seconds) before notifying",
+        default="15.0",
+        help_text="Alarms must be active this long before first notification"
+    )
 
     # -- Confirm and Write -----------------------------------------------------
     print_section("Configuration Summary")
@@ -304,9 +304,9 @@ def main():
     print(f"  NTFY Server:     {ntfy_server}")
     print(f"  NTFY Topic:      {ntfy_topic}")
     print(f"  Poll Interval:   {poll_interval} seconds")
-    if misload_codes:
-        print(f"  Misload Codes:   {', '.join(misload_codes)}")
-        print(f"  Min Lifetime:    {alarm_min_lifetime} seconds")
+    if suppress_codes:
+        print(f"  Suppress Codes:  {', '.join(suppress_codes)}")
+    print(f"  Min Lifetime:    {alarm_min_lifetime} seconds")
     print()
 
     if not ask_yes_no("Save this configuration?", default="yes"):
@@ -336,12 +336,12 @@ NTFY_URL = f"{ntfy_server}/{{NTFY_TOPIC}}"
 NTFY_SERVER = "{ntfy_server}"
 '''
 
-    if misload_codes:
-        config_content += f'''
-# -- Misload Detection --------------------------------------------------------
-MISLOAD_ALARM_CODES = {misload_codes!r}
+    config_content += f'''
+# -- Alarm Filtering --------------------------------------------------------
 ALARM_MIN_LIFETIME_SECONDS = {alarm_min_lifetime}
 '''
+    if suppress_codes:
+        config_content += f'SUPPRESS_CODES = {suppress_codes!r}\n'
 
     try:
         with open("config_local.py", "w") as f:
