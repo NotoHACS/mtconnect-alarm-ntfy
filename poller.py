@@ -39,6 +39,70 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
+# ── User Reserve Code Message Extraction ────────────────────────────────────────
+
+_USER_RESERVE_RE = re.compile(
+    r"(?:"
+    r"User reserve code\s+\d+\s+'([^']+)'"
+    r"|"
+    r"User reserve code\s+\d+\s+(.+?)(?:\s*;|\s*$)"
+    r"|"
+    r"\d+\s+ALARM_[A-Z]\s+\d+\s+(.+?);\s*Date:"
+    r")",
+    re.IGNORECASE,
+)
+
+
+def _extract_user_reserve_message(text: str) -> Optional[str]:
+    """Extract the custom message from an Okuma user reserve code alarm string.
+
+    Supports three formats (tried via single compiled regex with alternation):
+      1. ``User reserve code 1 'SELECT RESTART'; ...``
+      2. ``4209 User reserve code 1 SELECT RESTART``  (unquoted, ends at ``;`` or EOL)
+      3. ``4209 ALARM_D 1 SELECT RESTART; Date:...``   (verbose with severity prefix)
+
+    Returns the extracted message string, or *None* if no pattern matches.
+    """
+    m = _USER_RESERVE_RE.search(text)
+    if not m:
+        return None
+    # The three alternation groups are mutually exclusive — return whichever matched.
+    for group in (m.group(1), m.group(2), m.group(3)):
+        if group is not None:
+            return group.strip()
+    return None
+
+
+# ── LEGACY: pre-refactor sequential matcher (kept for rollback) ────────────────
+
+def _extract_user_reserve_message_legacy(text: str) -> Optional[str]:
+    """Original three-step sequential regex approach.
+
+    Kept here so a rollback is a one-line swap: replace
+    ``_extract_user_reserve_message`` with ``_extract_user_reserve_message_legacy``
+    in ``_elem_to_alarm``.
+    """
+    custom_msg = None
+
+    match = re.search(r"User reserve code \d+ '([^']+)'", text)
+    if match:
+        custom_msg = match.group(1)
+
+    if not custom_msg:
+        match = re.search(
+            r"User reserve code\s+\d+\s+(.+?)(?:\s*;|\s*$)", text, re.IGNORECASE
+        )
+        if match:
+            custom_msg = match.group(1).strip()
+
+    if not custom_msg:
+        match = re.search(r"\d+\s+ALARM_[A-Z]\s+\d+\s+(.+?);\s*Date:", text)
+        if match:
+            custom_msg = match.group(1).strip()
+
+    return custom_msg
+
+
 # ── Misload Detection Helper ────────────────────────────────────────────────────
 
 class MisloadDetector:
@@ -416,38 +480,15 @@ class AlarmPoller:
             if not alarm.component or alarm.component == "Unknown":
                 alarm.component = "CNC"
 
-            # NEW: Enhance user reserve code alarms with custom message from alarm text
+            # Enhance user reserve code alarms with custom message from alarm text
             # VDOUT values are masked (****) in XML, but custom message is in alarm text
-            # Pattern 1: "User reserve code 1 'SELECT RESTART'; ..."
-            # Pattern 2: "4209 User reserve code 1 SELECT RESTART" (new machine format)
             if "User reserve code" in alarm.native_message:
-                # Try multiple patterns for extracting the custom message
-                custom_msg = None
-                
-                # Pattern 1: Single quotes around message
-                match = re.search(r"User reserve code \d+ '([^']+)'", alarm.native_message)
-                if match:
-                    custom_msg = match.group(1)
-                
-                # Pattern 2: Code followed by "User reserve code N <message>"
-                # Format: "4209 User reserve code 1 SELECT RESTART" or similar
-                if not custom_msg:
-                    match = re.search(r"User reserve code\s+\d+\s+(.+?)(?:\s*;|\s*$)", alarm.native_message, re.IGNORECASE)
-                    if match:
-                        custom_msg = match.group(1).strip()
-                
-                # Pattern 3: Verbose format with code/severity prefix
-                # Format: "4209 ALARM_D 1 SELECT RESTART; Date:2026/04/14 Time:13:51:49 4209 User reserve code"
-                if not custom_msg:
-                    match = re.search(r"\d+\s+ALARM_[A-Z]\s+\d+\s+(.+?);\s*Date:", alarm.native_message)
-                    if match:
-                        custom_msg = match.group(1).strip()
-                
+                custom_msg = _extract_user_reserve_message(alarm.native_message)
+
                 if custom_msg:
                     alarm.native_message = f"[{alarm.native_code}] {custom_msg}"
                     logger.info("Enhanced user reserve alarm: %s", alarm.native_message)
                 else:
-                    # Fallback: just add brackets around code for consistent formatting
                     alarm.native_message = f"[{alarm.native_code}] {alarm.native_message}"
                     logger.info("Enhanced user reserve alarm (fallback): %s", alarm.native_message)
 
