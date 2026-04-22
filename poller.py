@@ -12,7 +12,7 @@ import logging
 import re
 import time
 import xml.etree.ElementTree as ET
-from typing import Set, Dict, List, Optional
+from typing import Set, Dict, List, Optional, Tuple
 
 import requests
 from requests.adapters import HTTPAdapter
@@ -140,7 +140,7 @@ class MisloadDetector:
 
         return None
 
-    def on_alarm_cleared(self, alarm: Alarm) -> tuple[bool, Optional[str]]:
+    def on_alarm_cleared(self, alarm: Alarm) -> Tuple[bool, Optional[str]]:
         """
         Called when alarm clears.
         Returns (should_report, custom_message):
