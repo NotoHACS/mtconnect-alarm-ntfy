@@ -12,7 +12,7 @@ import logging
 import re
 import time
 import xml.etree.ElementTree as ET
-from typing import Set, Dict, List, Optional, Tuple
+from typing import Set, Dict, List, Optional
 
 import requests
 from requests.adapters import HTTPAdapter
@@ -32,45 +32,11 @@ except ImportError:
     ALARM_MIN_LIFETIME_SECONDS = 10.0  # Default: suppress alarms clearing faster than 10s
 
 try:
-    from config import SUPPRESS_CODES
+    from config import MISLOAD_ALARM_CODES
 except ImportError:
-    SUPPRESS_CODES = []  # Default: no codes suppressed
+    MISLOAD_ALARM_CODES = []  # Default: no misload codes configured
 
 logger = logging.getLogger(__name__)
-
-
-# ── User Reserve Code Message Extraction ────────────────────────────────────────
-
-_USER_RESERVE_RE = re.compile(
-    r"(?:"
-    r"User reserve code\s+\d+\s+'([^']+)'"
-    r"|"
-    r"User reserve code\s+\d+\s+(.+?)(?:\s*;|\s*$)"
-    r"|"
-    r"\d+\s+ALARM_[A-Z]\s+\d+\s+(.+?);\s*Date:"
-    r")",
-    re.IGNORECASE,
-)
-
-
-def _extract_user_reserve_message(text: str) -> Optional[str]:
-    """Extract the custom message from an Okuma user reserve code alarm string.
-
-    Supports three formats (tried via single compiled regex with alternation):
-      1. ``User reserve code 1 'SELECT RESTART'; ...``
-      2. ``4209 User reserve code 1 SELECT RESTART``  (unquoted, ends at ``;`` or EOL)
-      3. ``4209 ALARM_D 1 SELECT RESTART; Date:...``   (verbose with severity prefix)
-
-    Returns the extracted message string, or *None* if no pattern matches.
-    """
-    m = _USER_RESERVE_RE.search(text)
-    if not m:
-        return None
-    # The three alternation groups are mutually exclusive — return whichever matched.
-    for group in (m.group(1), m.group(2), m.group(3)):
-        if group is not None:
-            return group.strip()
-    return None
 
 
 # ── AlarmPoller ────────────────────────────────────────────────────────────────
@@ -94,8 +60,6 @@ class AlarmPoller:
         self._url = f"{MTCONNECT_URL}/current"
         # active_alarms maps Alarm.key → Alarm instance
         self._active_alarms: Dict[str, Alarm] = {}
-        self._alarm_first_seen: Dict[str, float] = {}  # key -> timestamp
-        self._notified_active: Set[str] = set()  # keys already notified
 
         # Track which device name/path the agent uses so we can find alarms
         self._device_name = MTCONNECT_DEVICE
@@ -108,18 +72,17 @@ class AlarmPoller:
         self._session.mount("http://", adapter)
         self._session.headers.update({"Accept": "application/xml"})
 
-
-
     # ── Public API ────────────────────────────────────────────────────────────
 
     def poll(self):
         """
         Perform one poll of the MTConnect endpoint.
+
         Returns a generator of state-change dicts::
 
             {"type": "new",       "alarm": Alarm}
             {"type": "cleared",   "alarm": Alarm}
-            {"type": "reactivated","alarm": Alarm}   # was cleared, now active again
+            {"type": "reactivated","alarm": Alarm}  # was cleared, now active again
         """
         try:
             alarms = self._fetch_and_parse()
@@ -144,41 +107,17 @@ class AlarmPoller:
         previously_active = set(self._active_alarms.keys())
 
         # ── 1. Alarms that are new (active now, not in our tracked set) ──────
-        # Track new alarms silently, don't notify yet
         for key in current_active - previously_active:
             alarm = next(a for a in alarms if a.key == key)
             self._active_alarms[key] = alarm
-            self._alarm_first_seen[key] = time.time()  # Track when first seen
-            logger.info("Alarm detected (pending): %s", alarm)
-
-        # Check pending alarms - notify if lifetime >= min_lifetime
-        for key in list(self._active_alarms.keys()):
-            if key in self._notified_active:
-                continue
-            first_seen = self._alarm_first_seen.get(key, 0)
-            lifetime = time.time() - first_seen
-            if lifetime >= ALARM_MIN_LIFETIME_SECONDS:
-                self._notified_active.add(key)
-                alarm = self._active_alarms[key]
-                # Check if alarm should be suppressed
-                if alarm.native_code in SUPPRESS_CODES:
-                    logger.debug("Alarm %s suppressed (in SUPPRESS_CODES)", alarm.native_code)
-                    continue  # Skip notification
-                logger.info("Alarm active (notifying): %s", alarm)
-                yield {"type": "new", "alarm": alarm}
+            logger.info("New alarm detected: %s", alarm)
+            yield {"type": "new", "alarm": alarm}
 
         # ── 2. Alarms that have cleared (in tracked set, not in current) ──────
         for key in previously_active - current_active:
             cleared_alarm = self._active_alarms.pop(key)
-            self._alarm_first_seen.pop(key, None)
-            was_notified = key in self._notified_active
-            self._notified_active.discard(key)
-            
-            if was_notified:
-                logger.info("Alarm cleared: %s", cleared_alarm)
-                yield {"type": "cleared", "alarm": cleared_alarm}
-            else:
-                logger.info("Alarm cleared silently (too fast): %s", cleared_alarm.key)
+            logger.info("Alarm cleared: %s", cleared_alarm)
+            yield {"type": "cleared", "alarm": cleared_alarm}
 
         # ── 3. Reactivated alarms (key existed but alarm object changed) ──────
         for key in current_active & previously_active:
@@ -245,10 +184,10 @@ class AlarmPoller:
 
         MTConnect uses <Condition> blocks inside ComponentStream.
         The four condition states are element names:
-          <Normal/>        - healthy, no alarm
-          <Warning/>       - caution state
-          <Fault/>         - active alarm
-          <Unavailable/>   - condition unknown
+          <Normal/>   - healthy, no alarm
+          <Warning/>  - caution state
+          <Fault/>    - active alarm
+          <Unavailable/> - condition unknown
 
         We look for <Fault> and <Warning> elements specifically, plus any
         element that carries a nativeCode attribute.
@@ -261,7 +200,7 @@ class AlarmPoller:
         # First pass: extract VDOUT/VACUM data for correlation
         vdout_data = self._extract_vdout_data(root)
         vacum_data = self._extract_vacum_data(root)
-        
+
         # Second pass: extract alarms
         for elem in root.iter():
             # Strip namespace prefix if present
@@ -272,7 +211,7 @@ class AlarmPoller:
             has_native_code = "nativeCode" in elem.attrib
 
             if is_condition_alarm or has_native_code:
-                alarm = self._elem_to_alarm(elem, tag_local)
+                alarm = self._elem_to_alarm(elem, tag_local, vdout_data, vacum_data)
                 if alarm is not None:
                     alarms.append(alarm)
 
@@ -332,7 +271,7 @@ class AlarmPoller:
 
         return vacum_data
 
-    def _elem_to_alarm(self, elem, tag_local: str = "") -> Optional[Alarm]:
+    def _elem_to_alarm(self, elem, tag_local: str = "", vdout_data: Dict[str, str] = None, vacum_data: Dict[str, str] = None) -> Optional[Alarm]:
         """
         Convert a single XML element to an Alarm.
 
@@ -378,17 +317,55 @@ class AlarmPoller:
             if not alarm.component or alarm.component == "Unknown":
                 alarm.component = "CNC"
 
-            # Enhance user reserve code alarms with custom message from alarm text
+            # NEW: Enhance user reserve code alarms with custom message from alarm text
             # VDOUT values are masked (****) in XML, but custom message is in alarm text
+            # Pattern 1: "User reserve code 1 'SELECT RESTART'; ..."
+            # Pattern 2: "4209 User reserve code 1 SELECT RESTART" (new machine format)
             if "User reserve code" in alarm.native_message:
-                custom_msg = _extract_user_reserve_message(alarm.native_message)
+                # Try multiple patterns for extracting the custom message
+                custom_msg = None
+
+                # Pattern 1: Single quotes around message
+                match = re.search(r"User reserve code \d+ '([^']+)'", alarm.native_message)
+                if match:
+                    custom_msg = match.group(1)
+
+                # Pattern 2: Code followed by "User reserve code N <message>"
+                # Format: "4209 User reserve code 1 SELECT RESTART" or similar
+                if not custom_msg:
+                    match = re.search(r"User reserve code\s+\d+\s+(.+?)(?:\s*;|\s*$)", alarm.native_message, re.IGNORECASE)
+                    if match:
+                        custom_msg = match.group(1).strip()
+
+                # Pattern 3: Verbose format with code/severity prefix
+                # Format: "4209 ALARM_D 1 SELECT RESTART; Date:2026/04/14 Time:13:51:49 4209 User reserve code"
+                if not custom_msg:
+                    match = re.search(r"\d+\s+ALARM_[A-Z]\s+\d+\s+(.+?);\s*Date:", alarm.native_message)
+                    if match:
+                        custom_msg = match.group(1).strip()
 
                 if custom_msg:
                     alarm.native_message = f"[{alarm.native_code}] {custom_msg}"
                     logger.info("Enhanced user reserve alarm: %s", alarm.native_message)
                 else:
+                    # Fallback: just add brackets around code for consistent formatting
                     alarm.native_message = f"[{alarm.native_code}] {alarm.native_message}"
                     logger.info("Enhanced user reserve alarm (fallback): %s", alarm.native_message)
+
+            # NEW: Use VACUM data if available for user reserve codes
+            if alarm.native_code in ("2395", "3220", "4209"):
+                # Check if we have VACUM data for this alarm
+                vacum_key = f"VACUM{alarm.native_code}"
+                if vacum_data and vacum_key in vacum_data:
+                    custom_msg = vacum_data[vacum_key]
+                    if custom_msg and custom_msg.strip():
+                        alarm.native_message = f"[{alarm.native_code}] {custom_msg.strip()}"
+                        logger.info("Enhanced user reserve alarm via VACUM: %s", alarm.native_message)
+                # Also check VDOUT data for additional context
+                vdout_key = f"VDOUT{alarm.native_code}"
+                if vdout_data and vdout_key in vdout_data:
+                    vdout_value = vdout_data[vdout_key]
+                    logger.debug("Found VDOUT context for alarm %s: %s", alarm.native_code, vdout_value)
 
             return alarm
 
