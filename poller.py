@@ -338,9 +338,9 @@ class AlarmPoller:
                         custom_msg = match.group(1).strip()
 
                 # Pattern 3: Verbose format with code/severity prefix
-                # Format: "4209 ALARM_D 1 SELECT RESTART; Date:2026/04/14 Time:13:51:49 4209 User reserve code"
+                # Format: "4209 ALARM_D 1 SELECT RESTART; Date:..." or just "4209 ALARM_D 1 TEST"
                 if not custom_msg:
-                    match = re.search(r"\d+\s+ALARM_[A-Z]\s+\d+\s+(.+?);\s*Date:", alarm.native_message)
+                    match = re.search(r"\d+\s+ALARM_[A-Z]\s+\d+\s+(.+?)(?:;\s*Date:|$)", alarm.native_message)
                     if match:
                         custom_msg = match.group(1).strip()
 
