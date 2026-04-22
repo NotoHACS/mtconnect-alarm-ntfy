@@ -318,10 +318,9 @@ class AlarmPoller:
                 alarm.component = "CNC"
 
             # NEW: Enhance user reserve code alarms with custom message from alarm text
-            # VDOUT values are masked (****) in XML, but custom message is in alarm text
-            # Pattern 1: "User reserve code 1 'SELECT RESTART'; ..."
-            # Pattern 2: "4209 User reserve code 1 SELECT RESTART" (new machine format)
-            if "User reserve code" in alarm.native_message:
+            # These alarms have the format: "4209 ALARM_D 1 TEST" or similar
+            # The custom message is after the severity code and number
+            if alarm.native_code in ("2395", "3220", "4209") or "User reserve code" in alarm.native_message:
                 # Try multiple patterns for extracting the custom message
                 custom_msg = None
 
