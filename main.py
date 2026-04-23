@@ -45,6 +45,12 @@ from config import (
     NTFY_PRIORITY,
     NTFY_TAGS,
 )
+
+# Load SUPPRESS_CODES with fallback
+try:
+    from config import SUPPRESS_CODES
+except ImportError:
+    SUPPRESS_CODES = []  # Default: no codes suppressed
 from poller import AlarmPoller
 from models import Alarm
 from notifier import NtfyNotifier
@@ -206,6 +212,10 @@ def _get_priority_and_tags(alarm: Alarm) -> tuple:
 # -- Event handlers ------------------------------------------------------------
 
 def on_new_alarm(alarm: Alarm, dry_run: bool = False):
+    # Check if alarm code is in suppression list
+    if alarm.native_code and str(alarm.native_code) in [str(c) for c in SUPPRESS_CODES]:
+        logger.info("SUPPRESSING alarm %s (in SUPPRESS_CODES)", alarm.native_code)
+        return
     title = _format_title(alarm)
     body = _format_body(alarm)
     priority, tags = _get_priority_and_tags(alarm)
@@ -215,7 +225,15 @@ def on_new_alarm(alarm: Alarm, dry_run: bool = False):
 
 
 def on_cleared_alarm(alarm: Alarm, dry_run: bool = False):
+    # Check if alarm code is in suppression list
+    if alarm.native_code and str(alarm.native_code) in [str(c) for c in SUPPRESS_CODES]:
+        logger.info("SUPPRESSING cleared alarm %s (in SUPPRESS_CODES)", alarm.native_code)
+        return
     title = f"[CLEARED] {alarm.native_code or '?'}"
+    body = _format_body(alarm)
+    logger.info("CLEARED — %s", alarm.native_code or alarm.key)
+    if not dry_run:
+        _ntfy_send(title, body, tags=CLEARED_TAGS, priority=3)
     body = _format_body(alarm)
     logger.info("CLEARED — %s", alarm.native_code or alarm.key)
     if not dry_run:
