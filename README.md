@@ -1,4 +1,4 @@
-# MTConnect Alarm Monitor (Classic)
+# MTConnect Alarm Monitor
 
 Polls an Okuma MTConnect agent for CNC alarms and sends push notifications via [ntfy.sh](https://ntfy.sh) when alarms fire or clear.
 
@@ -152,14 +152,6 @@ Okuma user reserve codes (alarms 2395, 4209, etc.) now display their custom mess
 
 The custom message is extracted directly from the alarm text sent by your Okuma CNC.
 
-### Misload Detection
-
-Alarms that clear within 10 seconds are suppressed to prevent notification spam during misload conditions. You'll see one consolidated message instead of rapid on/off notifications.
-
-Configure which alarm codes indicate misload in `config_local.py`:
-```python
-MISLOAD_ALARM_CODES = ["4209", "2395"]  # Your misload alarm codes
-```
 
 ### Automatic Updates
 
@@ -175,7 +167,7 @@ Run `update.bat` anytime to get the latest features without reconfiguring. Your 
 2. Copy `start_monitor.bat` into the Startup folder
 3. Edit `start_monitor.bat` to match your path:
    ```batch
-   cd /d "C:\path\to\mtconnect-alarm-monitor-classic"
+   cd /d "D:\path\to\mtconnect-alarm-monitor-classic"
    python main.py
    ```
 
