@@ -235,4 +235,4 @@ MIT -- See LICENSE file
 
 ## Contributing
 
-Issues and PRs welcome at https://github.com/NotoHACS/mtconnect-alarm-monitor-classic
+Issues and PRs welcome at https://github.com/NotoHACS/mtconnect-alarm-ntfy
