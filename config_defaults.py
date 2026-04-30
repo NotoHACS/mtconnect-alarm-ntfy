@@ -1,5 +1,5 @@
 # Configuration defaults for MTConnect Alarm Monitor
-# These are fallback values - machine-specific config goes in config_local.py
+# Edit via config_gui.py or directly. config_local.py is no longer needed.
 
 # ── MTConnect Agent ──────────────────────────────────────────────────────────
 MTCONNECT_HOST = "localhost"
@@ -14,8 +14,10 @@ POLL_INTERVAL_SECONDS = 5
 REQUEST_TIMEOUT_SECONDS = 15
 
 # ── NTFY ───────────────────────────────────────────────────────────────────────
-NTFY_TOPIC = "cnc"
-NTFY_URL = f"https://ntfy.sh/{NTFY_TOPIC}"
+# NTFY_TOPIC must be set before the monitor will start polling.
+# An empty topic means the app has not been configured yet (first-run).
+NTFY_TOPIC = ""
+NTFY_URL = f"https://ntfy.sh/{NTFY_TOPIC}" if NTFY_TOPIC else ""
 NTFY_SERVER = "https://ntfy.sh"
 NTFY_PRIORITY = 4
 NTFY_TAGS = ["warning", "bell"]
@@ -33,5 +35,5 @@ LOG_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 ALARM_MIN_LIFETIME_SECONDS = 15.0
 
 # Alarm codes to completely suppress (never notify)
-# Example: ["1234", "5678"]  # <-- Set this in config_local.py
+# Example: ["1234", "5678"]
 SUPPRESS_CODES = []

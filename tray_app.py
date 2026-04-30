@@ -4,7 +4,9 @@ System tray application for MTConnect Alarm Monitor.
 
 Provides a system tray icon with Start/Stop polling control,
 a Settings window (opens config_gui.py), and graceful shutdown.
-Auto-starts polling on launch.
+Auto-starts polling on launch if NTFY_TOPIC is configured.
+On first run (empty topic), starts in stopped state with a notification
+prompting the user to open Settings.
 
 Usage:
     pythonw tray_app.py          # no console window
@@ -158,10 +160,28 @@ def _open_settings(icon, item):
 
 # ── Tray app ───────────────────────────────────────────────────────────────
 
+def _is_configured():
+    """Check if NTFY_TOPIC has been set (non-empty) — first-run sentinel."""
+    try:
+        for mod_name in ("config",):
+            if mod_name in sys.modules:
+                importlib.reload(sys.modules[mod_name])
+        from config import NTFY_TOPIC
+        return bool(NTFY_TOPIC and NTFY_TOPIC.strip())
+    except Exception:
+        return False
+
+
 engine = PollingEngine()
 
 
 def _start_polling(icon, item):
+    if not _is_configured():
+        icon.notify(
+            "Set your NTFY topic in Settings before starting.",
+            "Not Configured",
+        )
+        return
     engine.start()
     icon.icon = ICON_RUNNING
     icon.title = "MTConnect Alarm Monitor — Polling"
@@ -212,14 +232,29 @@ def _build_menu():
 
 
 def main():
+    configured = _is_configured()
+
+    initial_icon = ICON_RUNNING if configured else ICON_STOPPED
+    initial_title = (
+        "MTConnect Alarm Monitor — Polling"
+        if configured
+        else "MTConnect Alarm Monitor — Not Configured"
+    )
+
     icon = pystray.Icon(
         name="mtconnect_alarm",
-        icon=ICON_RUNNING,
-        title="MTConnect Alarm Monitor — Polling",
+        icon=initial_icon,
+        title=initial_title,
         menu=_build_menu(),
     )
 
-    engine.start()
+    if configured:
+        engine.start()
+    else:
+        icon.notify(
+            "Set your NTFY topic in Settings, then start polling.",
+            "First Run — Not Configured",
+        )
 
     icon.run()
 

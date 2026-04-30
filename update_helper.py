@@ -65,10 +65,13 @@ def _generate_config(values):
     lines.append(f"REQUEST_TIMEOUT_SECONDS = {values.get('REQUEST_TIMEOUT_SECONDS', 15)}")
 
     section("NTFY")
-    topic = values.get("NTFY_TOPIC", "cnc")
+    topic = values.get("NTFY_TOPIC", "")
     server = values.get("NTFY_SERVER", "https://ntfy.sh")
     lines.append(f'NTFY_TOPIC = "{topic}"')
-    lines.append(f'NTFY_URL = f"{server}/{{NTFY_TOPIC}}"')
+    if topic:
+        lines.append(f'NTFY_URL = f"{server}/{{NTFY_TOPIC}}"')
+    else:
+        lines.append('NTFY_URL = f"https://ntfy.sh/{NTFY_TOPIC}" if NTFY_TOPIC else ""')
     lines.append(f'NTFY_SERVER = "{server}"')
     lines.append(f"NTFY_PRIORITY = {values.get('NTFY_PRIORITY', 4)}")
     tags = values.get("NTFY_TAGS", ["warning", "bell"])

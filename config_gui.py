@@ -13,6 +13,8 @@ from tkinter import ttk, messagebox
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), "config_defaults.py")
 LOCAL_FILE = os.path.join(os.path.dirname(__file__), "config_local.py")
 
+TOPIC_RE = re.compile(r'^[a-zA-Z0-9_-]{3,}$')
+
 
 def parse_config(filepath):
     tree = ast.parse(open(filepath, encoding="utf-8").read())
@@ -56,7 +58,6 @@ def parse_float_input(text):
 STRING_FIELDS = {
     "MTCONNECT_HOST": "MTConnect Agent Host",
     "MTCONNECT_DEVICE": "MTConnect Device Name",
-    "NTFY_TOPIC": "NTFY Topic",
     "NTFY_SERVER": "NTFY Server URL",
     "NTFY_CLICK": "NTFY Click URL",
     "LOG_FILE": "Log File Path",
@@ -143,8 +144,24 @@ class ConfigGUI(tk.Toplevel):
             row=row, column=0, columnspan=3, sticky="w", pady=(0, 4)
         )
         row += 1
+
+        # NTFY Topic — required, prominent placement
+        ttk.Label(main, text="NTFY Topic *", font=("", 9, "bold")).grid(
+            row=row, column=0, sticky="w", padx=(0, 8), pady=2
+        )
+        topic_var = tk.StringVar(value=render_value(self.values.get("NTFY_TOPIC", "")))
+        topic_entry = ttk.Entry(parent=main, textvariable=topic_var)
+        topic_entry.grid(row=row, column=1, sticky="ew", pady=2)
+        self.widgets["NTFY_TOPIC"] = topic_var
+        row += 1
+        ttk.Label(
+            main,
+            text="  Required — subscribe to this topic in the ntfy app on your phone",
+            foreground="gray",
+        ).grid(row=row, column=0, columnspan=3, sticky="w", padx=(0, 8), pady=(0, 4))
+        row += 1
+
         row = self._add_fields(main, row, {}, {
-            "NTFY_TOPIC": "NTFY Topic",
             "NTFY_SERVER": "NTFY Server URL",
             "NTFY_PRIORITY": "NTFY Priority (1-5)",
         })
@@ -336,10 +353,13 @@ class ConfigGUI(tk.Toplevel):
         lines.append(f"REQUEST_TIMEOUT_SECONDS = {values.get('REQUEST_TIMEOUT_SECONDS', 15)}")
 
         section("NTFY")
-        topic = values.get("NTFY_TOPIC", "cnc")
+        topic = values.get("NTFY_TOPIC", "")
         server = values.get("NTFY_SERVER", "https://ntfy.sh")
         lines.append(f'NTFY_TOPIC = "{topic}"')
-        lines.append(f'NTFY_URL = f"{server}/{{NTFY_TOPIC}}"')
+        if topic:
+            lines.append(f'NTFY_URL = f"{server}/{{NTFY_TOPIC}}"')
+        else:
+            lines.append('NTFY_URL = f"https://ntfy.sh/{NTFY_TOPIC}" if NTFY_TOPIC else ""')
         lines.append(f'NTFY_SERVER = "{server}"')
         lines.append(f"NTFY_PRIORITY = {values.get('NTFY_PRIORITY', 4)}")
         tags = values.get("NTFY_TAGS", ["warning", "bell"])
@@ -368,6 +388,23 @@ class ConfigGUI(tk.Toplevel):
             messagebox.showerror("Validation Error", str(e))
             return
 
+        topic = values.get("NTFY_TOPIC", "").strip()
+        if not topic:
+            messagebox.showerror(
+                "NTFY Topic Required",
+                "NTFY Topic cannot be empty.\n\n"
+                "Set a topic name (3+ characters, letters/numbers/dashes/underscores)\n"
+                "and subscribe to it in the ntfy app on your phone.",
+            )
+            return
+        if not TOPIC_RE.match(topic):
+            messagebox.showerror(
+                "Invalid NTFY Topic",
+                f"'{topic}' is not a valid topic name.\n\n"
+                "Topic must be 3+ characters, using only letters, numbers, dashes, and underscores.",
+            )
+            return
+
         content = self._generate_config(values)
         try:
             with open(CONFIG_FILE, "w", encoding="utf-8") as f:
@@ -377,7 +414,7 @@ class ConfigGUI(tk.Toplevel):
                 os.remove(LOCAL_FILE)
                 self.local_warn_frame.grid_remove()
 
-            messagebox.showinfo("Saved", f"Configuration saved to config_defaults.py\n\nconfig_local.py was deleted.")
+            messagebox.showinfo("Saved", "Configuration saved to config_defaults.py")
         except Exception as e:
             messagebox.showerror("Error", f"Failed to save:\n{e}")
 
