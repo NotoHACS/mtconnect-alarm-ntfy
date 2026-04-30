@@ -150,7 +150,7 @@ class ConfigGUI(tk.Toplevel):
             row=row, column=0, sticky="w", padx=(0, 8), pady=2
         )
         topic_var = tk.StringVar(value=render_value(self.values.get("NTFY_TOPIC", "")))
-        topic_entry = ttk.Entry(parent=main, textvariable=topic_var)
+        topic_entry = ttk.Entry(main, textvariable=topic_var)
         topic_entry.grid(row=row, column=1, sticky="ew", pady=2)
         self.widgets["NTFY_TOPIC"] = topic_var
         row += 1
