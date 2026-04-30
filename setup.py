@@ -2,6 +2,9 @@
 """
 Interactive setup wizard for MTConnect Alarm Monitor.
 
+NOTE: This CLI wizard is deprecated. Use config_gui.py instead for a
+graphical configuration editor that reads/writes config_defaults.py directly.
+
 Guides the user through configuration -- no need to edit files manually.
 """
 

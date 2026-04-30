@@ -25,12 +25,18 @@ if errorlevel 1 (
 )
 
 REM Create backup of current config
-echo Backing up config_local.py...
-if exist "config_local.py" (
-    copy /Y "config_local.py" "config_local.py.bak" >nul
-    echo Config backed up to config_local.py.bak
+echo Backing up config_defaults.py...
+if exist "config_defaults.py" (
+    copy /Y "config_defaults.py" "config_defaults.py.bak" >nul
+    echo Config backed up to config_defaults.py.bak
 ) else (
-    echo No config_local.py to backup
+    echo No config_defaults.py to backup
+)
+
+REM Also keep a legacy config_local.py backup if it still exists
+if exist "config_local.py" (
+    echo Backing up config_local.py...
+    copy /Y "config_local.py" "config_local.py.bak" >nul
 )
 
 REM Run Python update helper
@@ -45,15 +51,20 @@ if errorlevel 1 (
     exit /b 1
 )
 
-REM Restore config if backup exists
-if exist "config_local.py.bak" (
+REM Restore config from backup if update failed (no new config written)
+if exist "config_defaults.py.bak" (
     echo.
-    if not exist "config_local.py" (
-        echo Restoring config_local.py from backup...
-        copy /Y "config_local.py.bak" "config_local.py" >nul
+    if not exist "config_defaults.py" (
+        echo Restoring config_defaults.py from backup...
+        copy /Y "config_defaults.py.bak" "config_defaults.py" >nul
     ) else (
-        echo config_local.py preserved
+        echo config_defaults.py preserved
     )
+    del /F /Q "config_defaults.py.bak" >nul 2>&1
+)
+
+REM Clean up legacy config_local.py backup
+if exist "config_local.py.bak" (
     del /F /Q "config_local.py.bak" >nul 2>&1
 )
 
@@ -62,6 +73,7 @@ echo ==========================================
 echo  Update complete!
 echo ==========================================
 echo.
+echo Run 'python config_gui.py' to adjust settings if needed.
 echo Restart your alarm monitor to use the new version.
 echo.
 pause
