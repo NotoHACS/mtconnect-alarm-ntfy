@@ -320,7 +320,20 @@ class AlarmPoller:
             # NEW: Enhance user reserve code alarms with custom message from alarm text
             # These alarms have the format: "4209 ALARM_D 1 TEST" or similar
             # The custom message is after the severity code and number
-            if alarm.native_code in ("2395", "3220", "4209") or "User reserve code" in alarm.native_message:
+            is_user_reserve = "User reserve code" in alarm.native_message
+            if not is_user_reserve and alarm.native_code:
+                try:
+                    import json, os
+                    _db_path = os.path.join(os.path.dirname(__file__), "alarm_db.json")
+                    if os.path.exists(_db_path):
+                        with open(_db_path, "r", encoding="utf-8") as _f:
+                            _db = json.load(_f)
+                        if alarm.native_code in _db and _db[alarm.native_code].get("name") == "User reserve code":
+                            is_user_reserve = True
+                except Exception:
+                    pass
+
+            if is_user_reserve:
                 # Try multiple patterns for extracting the custom message
                 custom_msg = None
 
@@ -351,16 +364,14 @@ class AlarmPoller:
                     alarm.native_message = f"[{alarm.native_code}] {alarm.native_message}"
                     logger.info("Enhanced user reserve alarm (fallback): %s", alarm.native_message)
 
-            # NEW: Use VACUM data if available for user reserve codes
-            if alarm.native_code in ("2395", "3220", "4209"):
-                # Check if we have VACUM data for this alarm
+            # Use VACUM/VDOUT data if available for any user reserve code
+            if is_user_reserve:
                 vacum_key = f"VACUM{alarm.native_code}"
                 if vacum_data and vacum_key in vacum_data:
                     custom_msg = vacum_data[vacum_key]
                     if custom_msg and custom_msg.strip():
                         alarm.native_message = f"[{alarm.native_code}] {custom_msg.strip()}"
                         logger.info("Enhanced user reserve alarm via VACUM: %s", alarm.native_message)
-                # Also check VDOUT data for additional context
                 vdout_key = f"VDOUT{alarm.native_code}"
                 if vdout_data and vdout_key in vdout_data:
                     vdout_value = vdout_data[vdout_key]

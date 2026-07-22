@@ -130,8 +130,27 @@ def _ntfy_send(title: str, message: str, tags: list = None, priority: int = NTFY
 
 # -- Notification formatting ----------------------------------------------------
 
+def _is_user_reserve_code(alarm: Alarm) -> bool:
+    """Check if this alarm is a user reserve code (custom PLC alarm)."""
+    if alarm.native_code:
+        db = _lookup_alarm(alarm.native_code)
+        if db and db.get("name", "") == "User reserve code":
+            return True
+    return False
+
+
 def _format_title(alarm: Alarm) -> str:
-    """Get alarm title — try DB lookup first, then native_message."""
+    """Get alarm title — for user reserve codes, use native_message; otherwise DB lookup."""
+    if _is_user_reserve_code(alarm):
+        msg = alarm.native_message or ""
+        if msg.startswith("[") and "]" in msg:
+            return msg.strip()
+        lines = msg.split("\n")
+        if len(lines) >= 2:
+            return lines[1].strip()
+        parts = msg.split(None, 1)
+        return parts[1].strip() if len(parts) > 1 else (alarm.native_code or "ALARM")
+
     if alarm.native_code:
         db = _lookup_alarm(alarm.native_code)
         if db:
@@ -146,8 +165,18 @@ def _format_title(alarm: Alarm) -> str:
 
 def _format_body(alarm: Alarm) -> str:
     """Get alarm body text."""
-    # Check for enhanced format first (user reserve codes with custom message)
     msg = alarm.native_message or ""
+
+    # User reserve codes: use native_message directly (has the custom PLC text)
+    if _is_user_reserve_code(alarm):
+        if msg.startswith("[") and "]" in msg:
+            return msg.strip()
+        lines = msg.split("\n")
+        if len(lines) >= 2:
+            return lines[1].strip()
+        return msg.strip() if msg.strip() else alarm.native_code
+
+    # Check for enhanced format first (user reserve codes with custom message)
     if msg.startswith("[") and "]" in msg:
         # Enhanced format: [4209] SELECT RESTART
         return msg.strip()
