@@ -263,10 +263,6 @@ def on_cleared_alarm(alarm: Alarm, dry_run: bool = False):
     logger.info("CLEARED — %s", alarm.native_code or alarm.key)
     if not dry_run:
         _ntfy_send(title, body, tags=CLEARED_TAGS, priority=3)
-    body = _format_body(alarm)
-    logger.info("CLEARED — %s", alarm.native_code or alarm.key)
-    if not dry_run:
-        _ntfy_send(title, body, tags=CLEARED_TAGS, priority=3)
 
 
 # -- Main poll loop ------------------------------------------------------------
